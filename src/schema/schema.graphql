@@ -20,5 +20,5 @@ type Query {
   transactionsByExactDate(date: DateTime!): [Transaction]!
   transactionsByDates(fromDate: DateTime, toDate: DateTime): [Transaction]!
   transactionsByYear(year: Int!): [Transaction]!
-  transactionsByCategory(categoryId: ID!) [Transaction]!
+  transactionsByCategory(categoryId: ID!): [Transaction]!
 }

@@ -1,5 +1,5 @@
 import { ApolloServer } from 'apollo-server';
-import { typeDefs } from './schema/definition';
+import { typeDefs } from 'src/schema/definition';
 
 const server = new ApolloServer({ typeDefs });
 

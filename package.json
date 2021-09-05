@@ -10,12 +10,14 @@
     "apollo-server": "^3.3.0",
     "graphql": "^15.5.2",
     "ts-node": "^10.2.1",
+    "tsconfig-paths": "^3.11.0",
     "typescript": "^4.4.2"
   },
   "scripts": {
-    "tsc": "tsc",
+    "dev": "ts-node-dev --clear --debounce 1300 --prefer-ts -r tsconfig-paths/register src/index.ts",
+    "build": "tsc -p .",
     "gen": "graphql-codegen --config codegen.yml",
-    "seed": "ts-node ./src/seed.ts"
+    "seed": "ts-node --projec tsconfig.json ./src/seed.ts"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.1.1",
@@ -29,6 +31,7 @@
     "eslint-config-prettier": "^8.3.0",
     "faker": "^5.5.3",
     "prettier": "^2.3.2",
-    "prisma": "^2.30.3"
+    "prisma": "^2.30.3",
+    "ts-node-dev": "^1.1.8"
   }
 }
