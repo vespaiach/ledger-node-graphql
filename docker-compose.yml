@@ -1,0 +1,12 @@
+version: '3.3'
+services:
+  ledger-backend:
+    image: postgres
+    restart: always
+    container_name: ledger-backend
+    environment:
+      - POSTGRES_PASSWORD=ledger
+      - POSTGRES_DB=ledger
+      - POSTGRES_USER=ledger
+    ports:
+      - 5432:5432
