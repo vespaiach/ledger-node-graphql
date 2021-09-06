@@ -1,8 +1,9 @@
 import { DataSource } from 'apollo-datasource';
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 
 import { TransactionModel } from 'src/schema/types';
+import { Maybe } from 'graphql/jsutils/Maybe';
 
 export class TransactionDS extends DataSource {
   private dbClient: PrismaClient;
@@ -67,19 +68,28 @@ export class TransactionDS extends DataSource {
     return this.getTransactionsByDates(fromDate, toDate);
   }
 
-  public async getTransactionsByDates(fromDate: Date, toDate: Date): Promise<TransactionModel[]> {
-    return await this.dbClient.transaction.findMany({
+  public async getTransactionsByDates(
+    fromDate: Maybe<Date>,
+    toDate: Maybe<Date>
+  ): Promise<TransactionModel[]> {
+    const date: { [key in string]: Date } = {};
+
+    if (fromDate) {
+      date.gte = fromDate;
+    }
+    if (toDate) {
+      date.lte = toDate;
+    }
+
+    const query: Prisma.SelectSubset<
+      Prisma.TransactionFindManyArgs,
+      Prisma.TransactionFindManyArgs
+    > = {
       orderBy: [
         {
           updatedAt: 'desc',
         },
       ],
-      where: {
-        date: {
-          gte: fromDate,
-          lte: toDate,
-        },
-      },
       select: {
         id: true,
         amount: true,
@@ -88,6 +98,12 @@ export class TransactionDS extends DataSource {
         updatedAt: true,
         reasonId: true,
       },
-    });
+    };
+
+    if (fromDate || toDate) {
+      query.where = { date };
+    }
+
+    return await this.dbClient.transaction.findMany(query);
   }
 }

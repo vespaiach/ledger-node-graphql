@@ -13,34 +13,18 @@ export const resolvers: Resolvers = {
       return transactionDs.getTransactionsByReasonId(reasonId);
     },
 
-    transactionsByExactDate: (_, args, context) => {
-      const { date } = args;
+    transactionsByDate: (_, args, context) => {
+      const dateFrom = args.input?.dateFrom ? new Date(args.input.dateFrom) : null;
+      const dateTo = args.input?.dateTo ? new Date(args.input.dateTo) : null;
       const { transactionDs } = context.dataSources;
-      return transactionDs.getTransactionsByDate(date);
-    },
 
-    transactionsByDates: (_, args, context) => {
-      const { fromDate, toDate } = args;
-      const { transactionDs } = context.dataSources;
-      return transactionDs.getTransactionsByDates(fromDate, toDate);
-    },
-
-    transactionsByMonth: (_, args, context) => {
-      const { year, month } = args;
-      const { transactionDs } = context.dataSources;
-      return transactionDs.getTransactionsByMonth(year, month);
-    },
-
-    transactionsByYear: (_, args, context) => {
-      const { year } = args;
-      const { transactionDs } = context.dataSources;
-      return transactionDs.getTransactionsByYear(year);
+      return transactionDs.getTransactionsByDates(dateFrom, dateTo);
     },
   },
 
   Transaction: {
     /**
-     * Prisma will resolve the n+1 problem. Don't need DataLoader lib. 
+     * Prisma will resolve the n+1 problem. Don't need DataLoader lib.
      */
     reason: (trans, _, context) => {
       const { reasonDs } = context.dataSources;
