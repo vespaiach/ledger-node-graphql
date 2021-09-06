@@ -39,6 +39,9 @@ export const resolvers: Resolvers = {
   },
 
   Transaction: {
+    /**
+     * Prisma will resolve the n+1 problem. Don't need DataLoader lib. 
+     */
     reason: (trans, _, context) => {
       const { reasonDs } = context.dataSources;
       return reasonDs.getReasonById(trans.reasonId);

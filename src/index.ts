@@ -1,12 +1,10 @@
-import { PrismaClient } from '@prisma/client';
 import { ApolloServer } from 'apollo-server';
 
 import { typeDefs } from 'src/schema/definition';
 import { ReasonDS } from 'src/datasource/reason';
 import { resolvers } from 'src/resolver';
 import { TransactionDS } from 'src/datasource/transaction';
-
-const dbClient = new PrismaClient();
+import { dbClient } from 'src/db';
 
 const server = new ApolloServer({
   typeDefs,
