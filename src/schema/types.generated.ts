@@ -21,6 +21,7 @@ export type Query = {
   transactionsByExactDate: Array<Maybe<Transaction>>;
   transactionsByDates: Array<Maybe<Transaction>>;
   transactionsByYear: Array<Maybe<Transaction>>;
+  transactionsByMonth: Array<Maybe<Transaction>>;
   transactionsByReason: Array<Maybe<Transaction>>;
 };
 
@@ -38,6 +39,12 @@ export type QueryTransactionsByDatesArgs = {
 
 export type QueryTransactionsByYearArgs = {
   year: Scalars['Int'];
+};
+
+
+export type QueryTransactionsByMonthArgs = {
+  year: Scalars['Int'];
+  month: Scalars['Int'];
 };
 
 
@@ -59,7 +66,7 @@ export type Transaction = {
   date: Scalars['DateTime'];
   description: Scalars['String'];
   updatedAt: Scalars['DateTime'];
-  reason: Reason;
+  reason?: Maybe<Reason>;
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -163,6 +170,7 @@ export type QueryResolvers<ContextType = CustomContext, ParentType extends Resol
   transactionsByExactDate?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsByExactDateArgs, 'date'>>;
   transactionsByDates?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsByDatesArgs, never>>;
   transactionsByYear?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsByYearArgs, 'year'>>;
+  transactionsByMonth?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsByMonthArgs, 'year' | 'month'>>;
   transactionsByReason?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsByReasonArgs, 'reasonId'>>;
 }>;
 
@@ -179,7 +187,7 @@ export type TransactionResolvers<ContextType = CustomContext, ParentType extends
   date?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  reason?: Resolver<ResolversTypes['Reason'], ParentType, ContextType>;
+  reason?: Resolver<Maybe<ResolversTypes['Reason']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

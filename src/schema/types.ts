@@ -11,4 +11,4 @@ export interface CustomContext {
 }
 
 export type ReasonModel = Reason;
-export type TransactionModel = Omit<Transaction, 'reasonId'>;
+export type TransactionModel = Transaction;

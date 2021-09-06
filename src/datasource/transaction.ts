@@ -28,6 +28,7 @@ export class TransactionDS extends DataSource {
         date: true,
         description: true,
         updatedAt: true,
+        reasonId: true,
       },
     });
   }
@@ -44,6 +45,29 @@ export class TransactionDS extends DataSource {
     endDay.setMinutes(59);
     endDay.setSeconds(59);
 
+    return this.getTransactionsByDates(startDay, endDay);
+  }
+
+  public getTransactionsByYear(year: number): Promise<TransactionModel[]> {
+    const fromDate = new Date(year, 0, 1, 0, 0, 0);
+    const toDate = new Date(year, 11, 31, 23, 59, 59);
+
+    return this.getTransactionsByDates(fromDate, toDate);
+  }
+
+  public getTransactionsByMonth(year: number, month: number): Promise<TransactionModel[]> {
+    const fromDate = new Date(year, month, 1, 0, 0, 0);
+    const toDate = new Date(fromDate.getTime());
+    toDate.setMonth(fromDate.getMonth() + 1);
+    toDate.setDate(1);
+    toDate.setHours(23);
+    toDate.setMinutes(59);
+    toDate.setSeconds(59);
+
+    return this.getTransactionsByDates(fromDate, toDate);
+  }
+
+  public async getTransactionsByDates(fromDate: Date, toDate: Date): Promise<TransactionModel[]> {
     return await this.dbClient.transaction.findMany({
       orderBy: [
         {
@@ -52,8 +76,8 @@ export class TransactionDS extends DataSource {
       ],
       where: {
         date: {
-          gte: startDay,
-          lte: endDay,
+          gte: fromDate,
+          lte: toDate,
         },
       },
       select: {
@@ -62,6 +86,7 @@ export class TransactionDS extends DataSource {
         date: true,
         description: true,
         updatedAt: true,
+        reasonId: true,
       },
     });
   }

@@ -25,4 +25,17 @@ export class ReasonDS extends DataSource {
       },
     });
   }
+
+  public async getReasonById(id: number): Promise<ReasonModel | null> {
+    return await this.dbClient.reason.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        text: true,
+        updatedAt: true,
+      },
+    });
+  }
 }
