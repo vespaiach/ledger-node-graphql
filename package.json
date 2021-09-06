@@ -17,6 +17,7 @@
     "typescript": "^4.4.2"
   },
   "scripts": {
+    "postinstall": "yarn run gen",
     "dev": "ts-node-dev --clear --debounce 1300 --prefer-ts -r tsconfig-paths/register src/index.ts",
     "build": "tsc -p .",
     "gen": "graphql-codegen --config codegen.yml",
