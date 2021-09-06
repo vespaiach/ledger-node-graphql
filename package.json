@@ -7,6 +7,7 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "^2.30.3",
+    "apollo-datasource": "^3.1.0",
     "apollo-server": "^3.3.0",
     "graphql": "^15.5.2",
     "ts-node": "^10.2.1",
@@ -17,12 +18,13 @@
     "dev": "ts-node-dev --clear --debounce 1300 --prefer-ts -r tsconfig-paths/register src/index.ts",
     "build": "tsc -p .",
     "gen": "graphql-codegen --config codegen.yml",
-    "seed": "ts-node --projec tsconfig.json ./src/seed.ts"
+    "seed": "ts-node --project tsconfig.json ./src/seed.ts"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.1.1",
     "@graphql-codegen/introspection": "2.1.0",
     "@graphql-codegen/typescript": "2.2.0",
+    "@graphql-codegen/typescript-operations": "^2.1.3",
     "@graphql-codegen/typescript-resolvers": "2.2.0",
     "@types/faker": "^5.5.8",
     "@typescript-eslint/eslint-plugin": "^4.30.0",

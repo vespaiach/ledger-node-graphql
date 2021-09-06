@@ -5,7 +5,17 @@ generates:
   src/schema/types.generated.ts:
     plugins:
       - "typescript"
+      - typescript-operations
       - "typescript-resolvers"
-  ./graphql.schema.json:
+    config:
+      scalars:
+        Date: Date
+      useIndexSignature: true # https://github.com/dotansimha/graphql-code-generator/issues/1133
+      contextType: ./types#CustomContext
+      maybeValue: T | null | undefined
+      mappers:
+        Reason: ./types#ReasonModel
+        Transaction: ./types#TransactionModel
+  src/schema/graphql.schema.json:
     plugins:
       - "introspection"

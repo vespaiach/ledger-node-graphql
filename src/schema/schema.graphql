@@ -1,24 +1,24 @@
 scalar DateTime
 
 type Transaction {
-  id: ID!
+  id: Int!
   amount: Float!
   date: DateTime!
   description: String!
   updatedAt: DateTime!
-  category: Category!
+  reason: Reason!
 }
 
-type Category {
-  id: ID!
-  name: String!
+type Reason {
+  id: Int!
+  text: String!
   updatedAt: DateTime!
 }
 
 type Query {
-  categories: [Category]!
+  reasons: [Reason]!
   transactionsByExactDate(date: DateTime!): [Transaction]!
   transactionsByDates(fromDate: DateTime, toDate: DateTime): [Transaction]!
   transactionsByYear(year: Int!): [Transaction]!
-  transactionsByCategory(categoryId: ID!): [Transaction]!
+  transactionsByReason(reasonId: Int!): [Transaction]!
 }
