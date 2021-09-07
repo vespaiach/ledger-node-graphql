@@ -25,6 +25,16 @@ export type DateInput = {
   dateTo?: Maybe<Scalars['String']>;
 };
 
+export type Mutation = {
+  __typename?: 'Mutation';
+  mutateTransaction?: Maybe<Transaction>;
+};
+
+
+export type MutationMutateTransactionArgs = {
+  input: TransactionInput;
+};
+
 export type Query = {
   __typename?: 'Query';
   reasons: Array<Maybe<Reason>>;
@@ -60,9 +70,17 @@ export type Transaction = {
   id: Scalars['Int'];
   amount: Scalars['Float'];
   date: Scalars['Date'];
-  description: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
   updatedAt: Scalars['Date'];
-  reason?: Maybe<Reason>;
+  reason: Reason;
+};
+
+export type TransactionInput = {
+  id?: Maybe<Scalars['Int']>;
+  amount?: Maybe<Scalars['Float']>;
+  date?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
+  reason?: Maybe<Scalars['String']>;
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -140,10 +158,12 @@ export type ResolversTypes = ResolversObject<{
   Date: ResolverTypeWrapper<Scalars['Date']>;
   DateInput: DateInput;
   String: ResolverTypeWrapper<Scalars['String']>;
+  Mutation: ResolverTypeWrapper<{}>;
   Query: ResolverTypeWrapper<{}>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Reason: ResolverTypeWrapper<ReasonModel>;
   Transaction: ResolverTypeWrapper<TransactionModel>;
+  TransactionInput: TransactionInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
 }>;
 
@@ -154,16 +174,22 @@ export type ResolversParentTypes = ResolversObject<{
   Date: Scalars['Date'];
   DateInput: DateInput;
   String: Scalars['String'];
+  Mutation: {};
   Query: {};
   Int: Scalars['Int'];
   Reason: ReasonModel;
   Transaction: TransactionModel;
+  TransactionInput: TransactionInput;
   Boolean: Scalars['Boolean'];
 }>;
 
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
   name: 'Date';
 }
+
+export type MutationResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  mutateTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<MutationMutateTransactionArgs, 'input'>>;
+}>;
 
 export type QueryResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   reasons?: Resolver<Array<Maybe<ResolversTypes['Reason']>>, ParentType, ContextType>;
@@ -183,14 +209,15 @@ export type TransactionResolvers<ContextType = CustomContext, ParentType extends
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   amount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
-  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
-  reason?: Resolver<Maybe<ResolversTypes['Reason']>, ParentType, ContextType>;
+  reason?: Resolver<ResolversTypes['Reason'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type Resolvers<ContextType = CustomContext> = ResolversObject<{
   Date?: GraphQLScalarType;
+  Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Reason?: ReasonResolvers<ContextType>;
   Transaction?: TransactionResolvers<ContextType>;

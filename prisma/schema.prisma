@@ -9,7 +9,7 @@ generator client {
 
 model Reason {
   id           Int           @id @default(autoincrement())
-  text         String        @db.VarChar(255)
+  text         String        @unique @db.VarChar(255)
   updatedAt    DateTime      @default(now())
   transactions Transaction[]
 }
@@ -18,7 +18,7 @@ model Transaction {
   id          Int      @id @default(autoincrement())
   amount      Decimal  @db.Decimal(15, 2)
   date        DateTime @default(now())
-  description String   @db.VarChar(511)
+  description String?  @db.VarChar(511)
   updatedAt   DateTime @default(now())
   reason      Reason   @relation(fields: [reasonId], references: [id])
   reasonId    Int

@@ -4,9 +4,9 @@ type Transaction {
   id: Int!
   amount: Float!
   date: Date!
-  description: String!
+  description: String
   updatedAt: Date!
-  reason: Reason
+  reason: Reason!
 }
 
 type Reason {
@@ -25,9 +25,21 @@ input AmountInput {
   amountTo: Float
 }
 
+input TransactionInput {
+  id: Int
+  amount: Float
+  date: String @constraint(format: "date")
+  description: String
+  reason: String
+}
+
 type Query {
   reasons: [Reason]!
   transactionsByDate(input: DateInput): [Transaction]!
   transactionsByReason(reasonId: Int!): [Transaction]!
   transactionsByAmount(input: AmountInput): [Transaction]!
+}
+
+type Mutation {
+  mutateTransaction(input: TransactionInput!): Transaction
 }

@@ -1,5 +1,17 @@
+import { Reason } from '.prisma/client';
 import { UserInputError } from 'apollo-server-errors';
+import { ReasonDS } from 'src/datasource/reason';
+import { ReasonModel } from 'src/schema/types';
 import { Resolvers } from 'src/schema/types.generated';
+
+async function lookupReason(reason: string, reasonDs: ReasonDS): Promise<ReasonModel> {
+  const santizedReason = reason.toLowerCase();
+  let reasonInfo = await reasonDs.getReasonByText(santizedReason);
+  if (!reasonInfo) {
+    reasonInfo = await reasonDs.addReason(santizedReason);
+  }
+  return reasonInfo;
+}
 
 export const resolvers: Resolvers = {
   Query: {
@@ -27,7 +39,7 @@ export const resolvers: Resolvers = {
     },
 
     transactionsByAmount: (_, args, context) => {
-      const amountFrom = args.input?.amountFrom ?? null ;
+      const amountFrom = args.input?.amountFrom ?? null;
       const amountTo = args.input?.amountTo ?? null;
       const { transactionDs } = context.dataSources;
 
@@ -39,13 +51,53 @@ export const resolvers: Resolvers = {
     },
   },
 
+  Mutation: {
+    mutateTransaction: async (_, args, context) => {
+      const { id, date, amount, description, reason } = args.input;
+      const { reasonDs, transactionDs } = context.dataSources;
+
+      if (!id) {
+        if (!date) {
+          throw new UserInputError('date is missing');
+        }
+        if (amount === null || amount === undefined) {
+          throw new UserInputError('amount is missing');
+        }
+        if (!reason) {
+          throw new UserInputError('reason is missing');
+        }
+
+        const reasonInfo = await lookupReason(reason, reasonDs);
+        return await transactionDs.addTransaction(
+          new Date(date),
+          amount,
+          reasonInfo.id,
+          description
+        );
+      } else {
+        let reasonId: number | null = null;
+        if (reason) {
+          const reasonInfo = await lookupReason(reason, reasonDs);
+          reasonId = reasonInfo.id;
+        }
+
+        return await transactionDs.updateTransaction(id, {
+          date: date ? new Date(date) : null,
+          amount,
+          description,
+          reasonId,
+        });
+      }
+    },
+  },
+
   Transaction: {
     /**
      * Prisma will resolve the n+1 problem. Don't need DataLoader lib.
      */
     reason: (trans, _, context) => {
       const { reasonDs } = context.dataSources;
-      return reasonDs.getReasonById(trans.reasonId);
+      return reasonDs.getReasonById(trans.reasonId) as Promise<Reason>;
     },
   },
 };

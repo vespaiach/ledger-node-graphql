@@ -107,7 +107,7 @@ export class TransactionDS extends DataSource {
     return await this.dbClient.transaction.findMany(query);
   }
 
-  public async getTransactionsByAmount(
+  public getTransactionsByAmount(
     fromAmount: Maybe<number>,
     toAmount: Maybe<number>
   ): Promise<TransactionModel[]> {
@@ -143,6 +143,76 @@ export class TransactionDS extends DataSource {
       query.where = { amount };
     }
 
-    return await this.dbClient.transaction.findMany(query);
+    return this.dbClient.transaction.findMany(query);
+  }
+
+  public addTransaction(
+    date: Date,
+    amount: number,
+    reasonId: number,
+    description?: string | null
+  ): Promise<TransactionModel> {
+    return this.dbClient.transaction.create({
+      data: {
+        date,
+        amount,
+        reasonId,
+        description,
+        updatedAt: new Date(),
+      },
+      select: {
+        id: true,
+        amount: true,
+        date: true,
+        description: true,
+        updatedAt: true,
+        reasonId: true,
+      },
+    });
+  }
+
+  public updateTransaction(
+    id: number,
+    {
+      date,
+      amount,
+      reasonId,
+      description,
+    }: {
+      date: Maybe<Date>;
+      amount: Maybe<number>;
+      reasonId: Maybe<number>;
+      description: Maybe<string>;
+    }
+  ): Promise<TransactionModel> {
+    const data: { [key in string]: Date | number | string | null } = {};
+    if (date) {
+      data.date = date;
+    }
+    if (amount !== null && amount !== undefined) {
+      data.amount = amount;
+    }
+    if (reasonId) {
+      data.reasonId = reasonId;
+    }
+    if (description !== undefined) {
+      data.description = description;
+    }
+    data.updatedAt = new Date();
+
+    return this.dbClient.transaction.update({
+      data,
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        amount: true,
+        date: true,
+        description: true,
+        updatedAt: true,
+        reasonId: true,
+      },
+    });
   }
 }
