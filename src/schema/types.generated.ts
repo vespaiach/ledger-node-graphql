@@ -15,6 +15,11 @@ export type Scalars = {
   Date: Date;
 };
 
+export type AmountInput = {
+  amountFrom?: Maybe<Scalars['Float']>;
+  amountTo?: Maybe<Scalars['Float']>;
+};
+
 export type DateInput = {
   dateFrom?: Maybe<Scalars['String']>;
   dateTo?: Maybe<Scalars['String']>;
@@ -25,6 +30,7 @@ export type Query = {
   reasons: Array<Maybe<Reason>>;
   transactionsByDate: Array<Maybe<Transaction>>;
   transactionsByReason: Array<Maybe<Transaction>>;
+  transactionsByAmount: Array<Maybe<Transaction>>;
 };
 
 
@@ -35,6 +41,11 @@ export type QueryTransactionsByDateArgs = {
 
 export type QueryTransactionsByReasonArgs = {
   reasonId: Scalars['Int'];
+};
+
+
+export type QueryTransactionsByAmountArgs = {
+  input?: Maybe<AmountInput>;
 };
 
 export type Reason = {
@@ -124,6 +135,8 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
+  AmountInput: AmountInput;
+  Float: ResolverTypeWrapper<Scalars['Float']>;
   Date: ResolverTypeWrapper<Scalars['Date']>;
   DateInput: DateInput;
   String: ResolverTypeWrapper<Scalars['String']>;
@@ -131,12 +144,13 @@ export type ResolversTypes = ResolversObject<{
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Reason: ResolverTypeWrapper<ReasonModel>;
   Transaction: ResolverTypeWrapper<TransactionModel>;
-  Float: ResolverTypeWrapper<Scalars['Float']>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
+  AmountInput: AmountInput;
+  Float: Scalars['Float'];
   Date: Scalars['Date'];
   DateInput: DateInput;
   String: Scalars['String'];
@@ -144,7 +158,6 @@ export type ResolversParentTypes = ResolversObject<{
   Int: Scalars['Int'];
   Reason: ReasonModel;
   Transaction: TransactionModel;
-  Float: Scalars['Float'];
   Boolean: Scalars['Boolean'];
 }>;
 
@@ -156,6 +169,7 @@ export type QueryResolvers<ContextType = CustomContext, ParentType extends Resol
   reasons?: Resolver<Array<Maybe<ResolversTypes['Reason']>>, ParentType, ContextType>;
   transactionsByDate?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsByDateArgs, never>>;
   transactionsByReason?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsByReasonArgs, 'reasonId'>>;
+  transactionsByAmount?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsByAmountArgs, never>>;
 }>;
 
 export type ReasonResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Reason'] = ResolversParentTypes['Reason']> = ResolversObject<{

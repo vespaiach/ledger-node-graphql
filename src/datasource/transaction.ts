@@ -106,4 +106,43 @@ export class TransactionDS extends DataSource {
 
     return await this.dbClient.transaction.findMany(query);
   }
+
+  public async getTransactionsByAmount(
+    fromAmount: Maybe<number>,
+    toAmount: Maybe<number>
+  ): Promise<TransactionModel[]> {
+    const amount: { [key in string]: number } = {};
+
+    if (fromAmount !== null && fromAmount !== undefined) {
+      amount.gte = fromAmount;
+    }
+    if (toAmount !== null && toAmount !== undefined) {
+      amount.lte = toAmount;
+    }
+
+    const query: Prisma.SelectSubset<
+      Prisma.TransactionFindManyArgs,
+      Prisma.TransactionFindManyArgs
+    > = {
+      orderBy: [
+        {
+          updatedAt: 'desc',
+        },
+      ],
+      select: {
+        id: true,
+        amount: true,
+        date: true,
+        description: true,
+        updatedAt: true,
+        reasonId: true,
+      },
+    };
+
+    if (Object.keys(amount).length) {
+      query.where = { amount };
+    }
+
+    return await this.dbClient.transaction.findMany(query);
+  }
 }

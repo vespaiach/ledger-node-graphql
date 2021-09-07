@@ -20,8 +20,14 @@ input DateInput {
   dateTo: String @constraint(format: "date")
 }
 
+input AmountInput {
+  amountFrom: Float
+  amountTo: Float
+}
+
 type Query {
   reasons: [Reason]!
   transactionsByDate(input: DateInput): [Transaction]!
   transactionsByReason(reasonId: Int!): [Transaction]!
+  transactionsByAmount(input: AmountInput): [Transaction]!
 }
