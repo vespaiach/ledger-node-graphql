@@ -34,3 +34,18 @@ yarn run seed
 ```
 yarn run dev
 ```
+
+# Heroku deployment
+
+### Create a new app on Heroku
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/vespaiach/ledger)
+
+### Manually deploy
+
+Using heroku cli
+
+```
+heroku git:remote -a <app_name>
+git push heroku main
+```
