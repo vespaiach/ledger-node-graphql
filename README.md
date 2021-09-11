@@ -39,7 +39,8 @@ yarn run dev
 
 ### Create a new app on Heroku
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/vespaiach/ledger)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/vespaiach/ledger-graphql)
+
 
 ### Manually deploy
 

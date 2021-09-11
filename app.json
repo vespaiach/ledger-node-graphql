@@ -2,5 +2,16 @@
   "name": "Ledger Backend",
   "description": "Graphql backend for Ledger web app",
   "repository": "https://github.com/vespaiach/ledger-graphql",
-  "keywords": ["node", "graphql", "ledger"]
+  "keywords": ["node", "graphql", "ledger"],
+  "addons": [
+    {
+      "plan": "heroku-postgresql:hobby-dev"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Runtime environment",
+      "value": "deployment"
+    }
+  }
 }
