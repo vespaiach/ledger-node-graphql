@@ -3,6 +3,6 @@
 if [ $NODE_ENV = "development" ]
 then
   npx prisma migrate reset --force && \
-  npx prisma migrate dev && \
+  npx prisma migrate deploy && \
   yarn run seed
 fi
