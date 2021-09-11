@@ -37,16 +37,24 @@ yarn run dev
 
 # Heroku deployment
 
-### Create a new app on Heroku
+## Create a new app on Heroku
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/vespaiach/ledger-graphql)
 
 
-### Manually deploy
+## Manually deploy
 
 Using heroku cli
 
 ```
-heroku git:remote -a <app_name>
+heroku git:remote -a <your_heroku_app_name>
 git push heroku main
+heroku run npx prisma migrate deploy -a <your_heroku_app_name>
+```
+
+
+## Seed database
+
+```
+heroku run yarn seed -a <your_heroku_app_name>
 ```
