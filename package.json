@@ -6,7 +6,7 @@
   "author": "Toan Nguyen <nta.toan@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@prisma/client": "^2.30.3",
+    "@prisma/client": "^3.0.2",
     "apollo-datasource": "^3.1.0",
     "apollo-server": "^3.3.0",
     "graphql": "^15.5.2",
@@ -36,7 +36,7 @@
     "eslint-config-prettier": "^8.3.0",
     "faker": "^5.5.3",
     "prettier": "^2.3.2",
-    "prisma": "^2.30.3",
+    "prisma": "^3.0.2",
     "ts-node-dev": "^1.1.8"
   }
 }
