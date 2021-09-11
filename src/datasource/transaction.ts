@@ -146,6 +146,22 @@ export class TransactionDS extends DataSource {
     return this.dbClient.transaction.findMany(query);
   }
 
+  public getTransaction(id: number): Promise<TransactionModel | null> {
+    return this.dbClient.transaction.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        amount: true,
+        date: true,
+        description: true,
+        updatedAt: true,
+        reasonId: true,
+      },
+    });
+  }
+
   public addTransaction(
     date: Date,
     amount: number,

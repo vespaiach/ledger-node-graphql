@@ -38,6 +38,7 @@ type Query {
   transactionsByDate(input: DateInput): [Transaction]!
   transactionsByReason(reasonId: Int!): [Transaction]!
   transactionsByAmount(input: AmountInput): [Transaction]!
+  transactionsById(id: Int!): Transaction
 }
 
 type Mutation {

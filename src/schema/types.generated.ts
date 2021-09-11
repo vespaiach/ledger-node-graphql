@@ -41,6 +41,7 @@ export type Query = {
   transactionsByDate: Array<Maybe<Transaction>>;
   transactionsByReason: Array<Maybe<Transaction>>;
   transactionsByAmount: Array<Maybe<Transaction>>;
+  transactionsById?: Maybe<Transaction>;
 };
 
 
@@ -56,6 +57,11 @@ export type QueryTransactionsByReasonArgs = {
 
 export type QueryTransactionsByAmountArgs = {
   input?: Maybe<AmountInput>;
+};
+
+
+export type QueryTransactionsByIdArgs = {
+  id: Scalars['Int'];
 };
 
 export type Reason = {
@@ -196,6 +202,7 @@ export type QueryResolvers<ContextType = CustomContext, ParentType extends Resol
   transactionsByDate?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsByDateArgs, never>>;
   transactionsByReason?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsByReasonArgs, 'reasonId'>>;
   transactionsByAmount?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsByAmountArgs, never>>;
+  transactionsById?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<QueryTransactionsByIdArgs, 'id'>>;
 }>;
 
 export type ReasonResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Reason'] = ResolversParentTypes['Reason']> = ResolversObject<{

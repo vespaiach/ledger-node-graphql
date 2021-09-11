@@ -1,5 +1,6 @@
 import { Reason } from '.prisma/client';
 import { UserInputError } from 'apollo-server-errors';
+
 import { ReasonDS } from 'src/datasource/reason';
 import { ReasonModel } from 'src/schema/types';
 import { Resolvers } from 'src/schema/types.generated';
@@ -48,6 +49,12 @@ export const resolvers: Resolvers = {
       }
 
       return transactionDs.getTransactionsByAmount(amountFrom, amountTo);
+    },
+
+    transactionsById: (_, args, context) => {
+      const { id } = args;
+      const { transactionDs } = context.dataSources;
+      return transactionDs.getTransaction(id);
     },
   },
 
