@@ -10,7 +10,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitThis": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "importHelpers": true,
     "noEmitHelpers": true,
     "module": "CommonJS",
@@ -20,7 +20,7 @@
     "skipLibCheck": true,
     "outDir": "./build",
     "paths": {
-      "src/*": ["src/*"],
+      "src/*": ["src/*"]
     }
   },
   "include": ["src"],

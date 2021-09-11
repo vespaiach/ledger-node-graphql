@@ -5,13 +5,19 @@
   "main": "index.js",
   "author": "Toan Nguyen <nta.toan@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": "14.x",
+    "yarn": "1.x"
+  },
   "dependencies": {
     "@prisma/client": "^3.0.2",
     "apollo-datasource": "^3.1.0",
     "apollo-server": "^3.3.0",
+    "faker": "^5.5.3",
     "graphql": "^15.5.2",
     "graphql-constraint-directive": "^2.1.1",
     "graphql-tools": "^8.2.0",
+    "prisma": "^3.0.2",
     "ts-node": "^10.2.1",
     "tsconfig-paths": "^3.11.0",
     "typescript": "^4.4.2"
@@ -19,9 +25,12 @@
   "scripts": {
     "postinstall": "yarn run gen",
     "dev": "ts-node-dev --clear --debounce 1300 --prefer-ts -r tsconfig-paths/register src/index.ts",
-    "build": "tsc -p .",
+    "build": "tsc -p . && tscpaths -p tsconfig.json -s ./src -o ./build",
     "gen": "graphql-codegen --config codegen.yml",
-    "seed": "ts-node --project tsconfig.json ./src/seed.ts"
+    "seed:ts": "ts-node --project tsconfig.json ./src/seed.ts",
+    "seed": "node ./build/seed.js",
+    "start": "node ./build/index.js",
+    "heroku-postbuild": "./migrate-dev.sh"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.1.1",
@@ -34,9 +43,8 @@
     "@typescript-eslint/parser": "^4.30.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "faker": "^5.5.3",
     "prettier": "^2.3.2",
-    "prisma": "^3.0.2",
-    "ts-node-dev": "^1.1.8"
+    "ts-node-dev": "^1.1.8",
+    "tscpaths": "^0.0.9"
   }
 }
