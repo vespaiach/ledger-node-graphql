@@ -15,14 +15,22 @@ type Reason {
   updatedAt: Date!
 }
 
-input DateInput {
-  dateFrom: String @constraint(format: "date")
-  dateTo: String @constraint(format: "date")
+enum SortBy {
+  DateDown
+  DateUp
+  AmountDown
+  AmountUp
 }
 
-input AmountInput {
+input TransactionFilterInput {
   amountFrom: Float
   amountTo: Float
+  dateFrom: String @constraint(format: "date")
+  dateTo: String @constraint(format: "date")
+  reason: Int
+  sortBy: SortBy
+  offset: Int
+  limit: Int
 }
 
 input TransactionInput {
@@ -33,12 +41,21 @@ input TransactionInput {
   reason: String
 }
 
+type Pagination {
+  total: Int!
+  offset: Int!
+  limit: Int!
+}
+
+type TransactionResult {
+  data: [Transaction]!
+  pagination: Pagination!
+}
+
 type Query {
   reasons: [Reason]!
-  transactionsByDate(input: DateInput): [Transaction]!
-  transactionsByReason(reasonId: Int!): [Transaction]!
-  transactionsByAmount(input: AmountInput): [Transaction]!
-  transactionsById(id: Int!): Transaction
+  transactions(input: TransactionFilterInput): TransactionResult!
+  transactionById(id: Int!): Transaction
 }
 
 type Mutation {
