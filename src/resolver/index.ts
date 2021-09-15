@@ -3,7 +3,7 @@ import { UserInputError } from 'apollo-server-errors';
 
 import { ReasonDS } from 'src/datasource/reason';
 import { ReasonModel } from 'src/schema/types';
-import { Resolvers } from 'src/schema/types.generated';
+import { Resolvers, SortBy } from 'src/schema/types.generated';
 
 async function lookupReason(reason: string, reasonDs: ReasonDS): Promise<ReasonModel> {
   const santizedReason = reason.toLowerCase();
@@ -14,6 +14,9 @@ async function lookupReason(reason: string, reasonDs: ReasonDS): Promise<ReasonM
   return reasonInfo;
 }
 
+const DEFAULT_OFFSET = 0;
+const DEFAULT_LIMIT = 100;
+
 export const resolvers: Resolvers = {
   Query: {
     reasons: (_, __, context) => {
@@ -21,37 +24,67 @@ export const resolvers: Resolvers = {
       return reasonDs.getReasons();
     },
 
-    transactionsByReason: (_, args, context) => {
-      const { reasonId } = args;
-      const { transactionDs } = context.dataSources;
-      return transactionDs.getTransactionsByReasonId(reasonId);
-    },
-
-    transactionsByDate: (_, args, context) => {
+    transactions: async (_, args, context) => {
       const dateFrom = args.input?.dateFrom ? new Date(args.input.dateFrom) : null;
       const dateTo = args.input?.dateTo ? new Date(args.input.dateTo) : null;
+      const amountFrom = args.input?.amountFrom;
+      const amountTo = args.input?.amountTo;
+      const reason = args.input?.reason;
+      const sortBy = args.input?.sortBy ?? SortBy.DateDown;
+      const offset = args.input?.offset ?? DEFAULT_OFFSET;
+      const limit = args.input?.offset ?? DEFAULT_LIMIT;
       const { transactionDs } = context.dataSources;
 
       if (dateFrom && dateTo && dateFrom > dateTo) {
         throw new UserInputError('Date from must be less than date to');
       }
-
-      return transactionDs.getTransactionsByDates(dateFrom, dateTo);
-    },
-
-    transactionsByAmount: (_, args, context) => {
-      const amountFrom = args.input?.amountFrom ?? null;
-      const amountTo = args.input?.amountTo ?? null;
-      const { transactionDs } = context.dataSources;
-
       if (amountFrom && amountTo && amountFrom > amountTo) {
         throw new UserInputError('Amount from must be less than amount to');
       }
 
-      return transactionDs.getTransactionsByAmount(amountFrom, amountTo);
+      let sort: Record<string, string> = {};
+      switch (sortBy) {
+        case SortBy.DateUp:
+          sort = { date: 'asc' };
+          break;
+        case SortBy.AmountUp:
+          sort = { mount: 'asc' };
+          break;
+        case SortBy.AmountDown:
+          sort = { mount: 'desc' };
+          break;
+        case SortBy.DateDown:
+        default:
+          sort = { date: 'desc' };
+          break;
+      }
+
+      return {
+        data: await transactionDs.getTransactions(
+          dateFrom,
+          dateTo,
+          amountFrom,
+          amountTo,
+          reason,
+          sort,
+          offset,
+          limit
+        ),
+        pagination: {
+          total: await transactionDs.countTransactions(
+            dateFrom,
+            dateTo,
+            amountFrom,
+            amountTo,
+            reason
+          ),
+          offset,
+          limit,
+        },
+      };
     },
 
-    transactionsById: (_, args, context) => {
+    transactionById: (_, args, context) => {
       const { id } = args;
       const { transactionDs } = context.dataSources;
       return transactionDs.getTransaction(id);

@@ -13,83 +13,53 @@ export class TransactionDS extends DataSource {
     this.dbClient = dbClient;
   }
 
-  public async getTransactionsByReasonId(reasonId: number): Promise<TransactionModel[]> {
-    return await this.dbClient.transaction.findMany({
-      orderBy: [
-        {
-          updatedAt: 'desc',
-        },
-      ],
-      where: {
-        reasonId,
-      },
-      select: {
-        id: true,
-        amount: true,
-        date: true,
-        description: true,
-        updatedAt: true,
-        reasonId: true,
-      },
-    });
-  }
-
-  public async getTransactionsByDate(date: Date): Promise<TransactionModel[]> {
-    const startDay = new Date(date.getTime());
-    const endDay = new Date(date.getTime());
-
-    startDay.setHours(0);
-    startDay.setMinutes(0);
-    startDay.setSeconds(0);
-
-    endDay.setHours(23);
-    endDay.setMinutes(59);
-    endDay.setSeconds(59);
-
-    return this.getTransactionsByDates(startDay, endDay);
-  }
-
-  public getTransactionsByYear(year: number): Promise<TransactionModel[]> {
-    const fromDate = new Date(year, 0, 1, 0, 0, 0);
-    const toDate = new Date(year, 11, 31, 23, 59, 59);
-
-    return this.getTransactionsByDates(fromDate, toDate);
-  }
-
-  public getTransactionsByMonth(year: number, month: number): Promise<TransactionModel[]> {
-    const fromDate = new Date(year, month, 1, 0, 0, 0);
-    const toDate = new Date(fromDate.getTime());
-    toDate.setMonth(fromDate.getMonth() + 1);
-    toDate.setDate(1);
-    toDate.setHours(23);
-    toDate.setMinutes(59);
-    toDate.setSeconds(59);
-
-    return this.getTransactionsByDates(fromDate, toDate);
-  }
-
-  public async getTransactionsByDates(
+  public getTransactions(
     fromDate: Maybe<Date>,
-    toDate: Maybe<Date>
+    toDate: Maybe<Date>,
+    fromAmount: Maybe<number>,
+    toAmount: Maybe<number>,
+    reason: Maybe<number>,
+    sortBy: { date?: 'desc' | 'asc'; amount?: 'desc' | 'asc' },
+    offset: number,
+    limit: number
   ): Promise<TransactionModel[]> {
-    const date: { [key in string]: Date } = {};
+    const where: Prisma.TransactionWhereInput = {};
+    let orderBy: Prisma.Enumerable<Prisma.TransactionOrderByWithRelationInput> = {};
 
     if (fromDate) {
-      date.gte = fromDate;
+      where.date = <Prisma.DateTimeFilter>(where.date || {});
+      where.date.gte = fromDate;
     }
     if (toDate) {
-      date.lte = toDate;
+      where.date = <Prisma.DateTimeFilter>(where.date || {});
+      where.date.lte = toDate;
+    }
+
+    if (fromAmount) {
+      where.amount = <Prisma.DecimalFilter>(where.amount || {});
+      where.amount.gte = fromAmount;
+    }
+    if (toAmount) {
+      where.amount = <Prisma.DecimalFilter>(where.amount || {});
+      where.amount.lte = toAmount;
+    }
+
+    if (reason) {
+      where.reasonId = reason;
+    }
+
+    if (sortBy) {
+      orderBy = [sortBy];
     }
 
     const query: Prisma.SelectSubset<
       Prisma.TransactionFindManyArgs,
       Prisma.TransactionFindManyArgs
     > = {
-      orderBy: [
-        {
-          updatedAt: 'desc',
-        },
-      ],
+      skip: offset,
+      take: limit,
+      where,
+      orderBy,
       select: {
         id: true,
         amount: true,
@@ -99,51 +69,42 @@ export class TransactionDS extends DataSource {
         reasonId: true,
       },
     };
-
-    if (fromDate || toDate) {
-      query.where = { date };
-    }
-
-    return await this.dbClient.transaction.findMany(query);
-  }
-
-  public getTransactionsByAmount(
-    fromAmount: Maybe<number>,
-    toAmount: Maybe<number>
-  ): Promise<TransactionModel[]> {
-    const amount: { [key in string]: number } = {};
-
-    if (fromAmount !== null && fromAmount !== undefined) {
-      amount.gte = fromAmount;
-    }
-    if (toAmount !== null && toAmount !== undefined) {
-      amount.lte = toAmount;
-    }
-
-    const query: Prisma.SelectSubset<
-      Prisma.TransactionFindManyArgs,
-      Prisma.TransactionFindManyArgs
-    > = {
-      orderBy: [
-        {
-          updatedAt: 'desc',
-        },
-      ],
-      select: {
-        id: true,
-        amount: true,
-        date: true,
-        description: true,
-        updatedAt: true,
-        reasonId: true,
-      },
-    };
-
-    if (Object.keys(amount).length) {
-      query.where = { amount };
-    }
 
     return this.dbClient.transaction.findMany(query);
+  }
+
+  public countTransactions(
+    fromDate: Maybe<Date>,
+    toDate: Maybe<Date>,
+    fromAmount: Maybe<number>,
+    toAmount: Maybe<number>,
+    reason: Maybe<number>
+  ): Promise<number> {
+    const where: Prisma.TransactionWhereInput = {};
+
+    if (fromDate) {
+      where.date = <Prisma.DateTimeFilter>(where.date || {});
+      where.date.gte = fromDate;
+    }
+    if (toDate) {
+      where.date = <Prisma.DateTimeFilter>(where.date || {});
+      where.date.lte = toDate;
+    }
+
+    if (fromAmount) {
+      where.amount = <Prisma.DecimalFilter>(where.amount || {});
+      where.amount.gte = fromAmount;
+    }
+    if (toAmount) {
+      where.amount = <Prisma.DecimalFilter>(where.amount || {});
+      where.amount.lte = toAmount;
+    }
+
+    if (reason) {
+      where.reasonId = reason;
+    }
+
+    return this.dbClient.transaction.count({ where });
   }
 
   public getTransaction(id: number): Promise<TransactionModel | null> {
