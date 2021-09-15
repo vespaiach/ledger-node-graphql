@@ -32,7 +32,7 @@ export const resolvers: Resolvers = {
       const reason = args.input?.reason;
       const sortBy = args.input?.sortBy ?? SortBy.DateDown;
       const offset = args.input?.offset ?? DEFAULT_OFFSET;
-      const limit = args.input?.offset ?? DEFAULT_LIMIT;
+      const limit = args.input?.limit ?? DEFAULT_LIMIT;
       const { transactionDs } = context.dataSources;
 
       if (dateFrom && dateTo && dateFrom > dateTo) {
