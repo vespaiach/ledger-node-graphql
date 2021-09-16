@@ -77,7 +77,10 @@ export const resolvers: Resolvers = {
         reason
       );
 
-      return Math.floor(total / limit) + (total % limit === 0 ? 0 : 1);
+      return {
+        totalPages: Math.floor(total / limit) + (total % limit === 0 ? 0 : 1),
+        totalRecords: total,
+      };
     },
   },
 

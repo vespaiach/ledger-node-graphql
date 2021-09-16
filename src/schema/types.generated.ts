@@ -4,7 +4,6 @@ export type Maybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -28,9 +27,8 @@ export type MutationMutateTransactionArgs = {
 
 export type Pagination = {
   __typename?: 'Pagination';
-  total: Scalars['Int'];
-  offset: Scalars['Int'];
-  limit: Scalars['Int'];
+  totalRecords: Scalars['Int'];
+  totalPages: Scalars['Int'];
 };
 
 export type Query = {
@@ -38,7 +36,7 @@ export type Query = {
   reasons: Array<Maybe<Reason>>;
   transactions: Array<Maybe<Transaction>>;
   transactionById?: Maybe<Transaction>;
-  totalPages: Scalars['Int'];
+  totalPages: Pagination;
 };
 
 
@@ -89,12 +87,6 @@ export type TransactionInput = {
   date?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   reason?: Maybe<Scalars['String']>;
-};
-
-export type TransactionResult = {
-  __typename?: 'TransactionResult';
-  data: Array<Maybe<Transaction>>;
-  pagination: Pagination;
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -178,7 +170,6 @@ export type ResolversTypes = ResolversObject<{
   Float: ResolverTypeWrapper<Scalars['Float']>;
   TransactionFilterInput: TransactionFilterInput;
   TransactionInput: TransactionInput;
-  TransactionResult: ResolverTypeWrapper<Omit<TransactionResult, 'data'> & { data: Array<Maybe<ResolversTypes['Transaction']>> }>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
 }>;
 
@@ -195,7 +186,6 @@ export type ResolversParentTypes = ResolversObject<{
   Float: Scalars['Float'];
   TransactionFilterInput: TransactionFilterInput;
   TransactionInput: TransactionInput;
-  TransactionResult: Omit<TransactionResult, 'data'> & { data: Array<Maybe<ResolversParentTypes['Transaction']>> };
   Boolean: Scalars['Boolean'];
 }>;
 
@@ -208,9 +198,8 @@ export type MutationResolvers<ContextType = CustomContext, ParentType extends Re
 }>;
 
 export type PaginationResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Pagination'] = ResolversParentTypes['Pagination']> = ResolversObject<{
-  total?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  offset?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  limit?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  totalRecords?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  totalPages?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -218,7 +207,7 @@ export type QueryResolvers<ContextType = CustomContext, ParentType extends Resol
   reasons?: Resolver<Array<Maybe<ResolversTypes['Reason']>>, ParentType, ContextType>;
   transactions?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsArgs, never>>;
   transactionById?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<QueryTransactionByIdArgs, 'id'>>;
-  totalPages?: Resolver<ResolversTypes['Int'], ParentType, ContextType, RequireFields<QueryTotalPagesArgs, never>>;
+  totalPages?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType, RequireFields<QueryTotalPagesArgs, never>>;
 }>;
 
 export type ReasonResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Reason'] = ResolversParentTypes['Reason']> = ResolversObject<{
@@ -238,12 +227,6 @@ export type TransactionResolvers<ContextType = CustomContext, ParentType extends
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type TransactionResultResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['TransactionResult'] = ResolversParentTypes['TransactionResult']> = ResolversObject<{
-  data?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType>;
-  pagination?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
 export type Resolvers<ContextType = CustomContext> = ResolversObject<{
   Date?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;
@@ -251,6 +234,5 @@ export type Resolvers<ContextType = CustomContext> = ResolversObject<{
   Query?: QueryResolvers<ContextType>;
   Reason?: ReasonResolvers<ContextType>;
   Transaction?: TransactionResolvers<ContextType>;
-  TransactionResult?: TransactionResultResolvers<ContextType>;
 }>;
 

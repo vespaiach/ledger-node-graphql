@@ -34,21 +34,15 @@ input TransactionInput {
 }
 
 type Pagination {
-  total: Int!
-  offset: Int!
-  limit: Int!
-}
-
-type TransactionResult {
-  data: [Transaction]!
-  pagination: Pagination!
+  totalRecords: Int!
+  totalPages: Int!
 }
 
 type Query {
   reasons: [Reason]!
   transactions(input: TransactionFilterInput): [Transaction]!
   transactionById(id: Int!): Transaction
-  totalPages(input: TransactionFilterInput): Int!
+  totalPages(input: TransactionFilterInput): Pagination!
 }
 
 type Mutation {
