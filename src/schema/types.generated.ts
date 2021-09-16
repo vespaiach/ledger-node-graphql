@@ -36,8 +36,9 @@ export type Pagination = {
 export type Query = {
   __typename?: 'Query';
   reasons: Array<Maybe<Reason>>;
-  transactions: TransactionResult;
+  transactions: Array<Maybe<Transaction>>;
   transactionById?: Maybe<Transaction>;
+  totalPages: Scalars['Int'];
 };
 
 
@@ -50,19 +51,17 @@ export type QueryTransactionByIdArgs = {
   id: Scalars['Int'];
 };
 
+
+export type QueryTotalPagesArgs = {
+  input?: Maybe<TransactionFilterInput>;
+};
+
 export type Reason = {
   __typename?: 'Reason';
   id: Scalars['Int'];
   text: Scalars['String'];
   updatedAt: Scalars['Date'];
 };
-
-export enum SortBy {
-  DateDown = 'DateDown',
-  DateUp = 'DateUp',
-  AmountDown = 'AmountDown',
-  AmountUp = 'AmountUp'
-}
 
 export type Transaction = {
   __typename?: 'Transaction';
@@ -80,7 +79,6 @@ export type TransactionFilterInput = {
   dateFrom?: Maybe<Scalars['String']>;
   dateTo?: Maybe<Scalars['String']>;
   reason?: Maybe<Scalars['Int']>;
-  sortBy?: Maybe<SortBy>;
   offset?: Maybe<Scalars['Int']>;
   limit?: Maybe<Scalars['Int']>;
 };
@@ -176,7 +174,6 @@ export type ResolversTypes = ResolversObject<{
   Query: ResolverTypeWrapper<{}>;
   Reason: ResolverTypeWrapper<ReasonModel>;
   String: ResolverTypeWrapper<Scalars['String']>;
-  SortBy: SortBy;
   Transaction: ResolverTypeWrapper<TransactionModel>;
   Float: ResolverTypeWrapper<Scalars['Float']>;
   TransactionFilterInput: TransactionFilterInput;
@@ -219,8 +216,9 @@ export type PaginationResolvers<ContextType = CustomContext, ParentType extends 
 
 export type QueryResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   reasons?: Resolver<Array<Maybe<ResolversTypes['Reason']>>, ParentType, ContextType>;
-  transactions?: Resolver<ResolversTypes['TransactionResult'], ParentType, ContextType, RequireFields<QueryTransactionsArgs, never>>;
+  transactions?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsArgs, never>>;
   transactionById?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<QueryTransactionByIdArgs, 'id'>>;
+  totalPages?: Resolver<ResolversTypes['Int'], ParentType, ContextType, RequireFields<QueryTotalPagesArgs, never>>;
 }>;
 
 export type ReasonResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Reason'] = ResolversParentTypes['Reason']> = ResolversObject<{
