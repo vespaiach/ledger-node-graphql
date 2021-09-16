@@ -19,13 +19,10 @@ export class TransactionDS extends DataSource {
     fromAmount: Maybe<number>,
     toAmount: Maybe<number>,
     reason: Maybe<number>,
-    sortBy: { date?: 'desc' | 'asc'; amount?: 'desc' | 'asc' },
     offset: number,
     limit: number
   ): Promise<TransactionModel[]> {
     const where: Prisma.TransactionWhereInput = {};
-    let orderBy: Prisma.Enumerable<Prisma.TransactionOrderByWithRelationInput> = {};
-
     if (fromDate) {
       where.date = <Prisma.DateTimeFilter>(where.date || {});
       where.date.gte = fromDate;
@@ -48,10 +45,6 @@ export class TransactionDS extends DataSource {
       where.reasonId = reason;
     }
 
-    if (sortBy) {
-      orderBy = [sortBy];
-    }
-
     const query: Prisma.SelectSubset<
       Prisma.TransactionFindManyArgs,
       Prisma.TransactionFindManyArgs
@@ -59,7 +52,9 @@ export class TransactionDS extends DataSource {
       skip: offset,
       take: limit,
       where,
-      orderBy,
+      orderBy: {
+        date: 'desc'
+      },
       select: {
         id: true,
         amount: true,
