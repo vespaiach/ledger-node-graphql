@@ -42,7 +42,7 @@ type Query {
   reasons: [Reason]!
   transactions(input: TransactionFilterInput): [Transaction]!
   transactionById(id: Int!): Transaction
-  totalPages(input: TransactionFilterInput): Pagination!
+  getTotalPages(input: TransactionFilterInput): Pagination!
 }
 
 type Mutation {

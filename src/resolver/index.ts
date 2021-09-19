@@ -65,7 +65,7 @@ export const resolvers: Resolvers = {
       return transactionDs.getTransaction(id);
     },
 
-    totalPages: async (_, args, context) => {
+    getTotalPages: async (_, args, context) => {
       const { dateFrom, dateTo, amountFrom, amountTo, reason, limit } = validateAndSanitize(args);
       const { transactionDs } = context.dataSources;
 

@@ -36,7 +36,7 @@ export type Query = {
   reasons: Array<Maybe<Reason>>;
   transactions: Array<Maybe<Transaction>>;
   transactionById?: Maybe<Transaction>;
-  totalPages: Pagination;
+  getTotalPages: Pagination;
 };
 
 
@@ -50,7 +50,7 @@ export type QueryTransactionByIdArgs = {
 };
 
 
-export type QueryTotalPagesArgs = {
+export type QueryGetTotalPagesArgs = {
   input?: Maybe<TransactionFilterInput>;
 };
 
@@ -207,7 +207,7 @@ export type QueryResolvers<ContextType = CustomContext, ParentType extends Resol
   reasons?: Resolver<Array<Maybe<ResolversTypes['Reason']>>, ParentType, ContextType>;
   transactions?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsArgs, never>>;
   transactionById?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<QueryTransactionByIdArgs, 'id'>>;
-  totalPages?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType, RequireFields<QueryTotalPagesArgs, never>>;
+  getTotalPages?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType, RequireFields<QueryGetTotalPagesArgs, never>>;
 }>;
 
 export type ReasonResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Reason'] = ResolversParentTypes['Reason']> = ResolversObject<{
