@@ -122,6 +122,14 @@ export const resolvers: Resolvers = {
         });
       }
     },
+
+    deleteTransaction: async (_, args, context) => {
+      const { id } = args;
+      const { transactionDs } = context.dataSources;
+
+      const deleted = await transactionDs.delateTransaction(id);
+      return Boolean(deleted.id);
+    },
   },
 
   Transaction: {

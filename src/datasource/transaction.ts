@@ -53,7 +53,7 @@ export class TransactionDS extends DataSource {
       take: limit,
       where,
       orderBy: {
-        date: 'desc'
+        date: 'desc',
       },
       select: {
         id: true,
@@ -116,6 +116,10 @@ export class TransactionDS extends DataSource {
         reasonId: true,
       },
     });
+  }
+
+  public delateTransaction(id: number): Promise<TransactionModel> {
+    return this.dbClient.transaction.delete({ where: { id } });
   }
 
   public addTransaction(

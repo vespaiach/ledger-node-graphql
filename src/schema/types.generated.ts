@@ -18,11 +18,17 @@ export type Scalars = {
 export type Mutation = {
   __typename?: 'Mutation';
   mutateTransaction?: Maybe<Transaction>;
+  deleteTransaction?: Maybe<Scalars['Boolean']>;
 };
 
 
 export type MutationMutateTransactionArgs = {
   input: TransactionInput;
+};
+
+
+export type MutationDeleteTransactionArgs = {
+  id: Scalars['Int'];
 };
 
 export type Pagination = {
@@ -161,8 +167,9 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = ResolversObject<{
   Date: ResolverTypeWrapper<Scalars['Date']>;
   Mutation: ResolverTypeWrapper<{}>;
-  Pagination: ResolverTypeWrapper<Pagination>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
+  Pagination: ResolverTypeWrapper<Pagination>;
   Query: ResolverTypeWrapper<{}>;
   Reason: ResolverTypeWrapper<ReasonModel>;
   String: ResolverTypeWrapper<Scalars['String']>;
@@ -170,15 +177,15 @@ export type ResolversTypes = ResolversObject<{
   Float: ResolverTypeWrapper<Scalars['Float']>;
   TransactionFilterInput: TransactionFilterInput;
   TransactionInput: TransactionInput;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   Date: Scalars['Date'];
   Mutation: {};
-  Pagination: Pagination;
+  Boolean: Scalars['Boolean'];
   Int: Scalars['Int'];
+  Pagination: Pagination;
   Query: {};
   Reason: ReasonModel;
   String: Scalars['String'];
@@ -186,7 +193,6 @@ export type ResolversParentTypes = ResolversObject<{
   Float: Scalars['Float'];
   TransactionFilterInput: TransactionFilterInput;
   TransactionInput: TransactionInput;
-  Boolean: Scalars['Boolean'];
 }>;
 
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
@@ -195,6 +201,7 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 
 export type MutationResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   mutateTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<MutationMutateTransactionArgs, 'input'>>;
+  deleteTransaction?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTransactionArgs, 'id'>>;
 }>;
 
 export type PaginationResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Pagination'] = ResolversParentTypes['Pagination']> = ResolversObject<{
