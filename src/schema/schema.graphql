@@ -47,4 +47,5 @@ type Query {
 
 type Mutation {
   mutateTransaction(input: TransactionInput!): Transaction
+  deleteTransaction(id: Int!): Boolean
 }
