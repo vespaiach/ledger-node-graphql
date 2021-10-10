@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("LEDGER_DATABASE_URL")
 }
 
 generator client {
@@ -15,11 +15,12 @@ model Reason {
 }
 
 model Transaction {
-  id          Int      @id @default(autoincrement())
-  amount      Decimal  @db.Decimal(15, 2)
-  date        DateTime @default(now())
-  description String?  @db.VarChar(511)
-  updatedAt   DateTime @default(now())
-  reason      Reason   @relation(fields: [reasonId], references: [id])
+  id          Int       @id @default(autoincrement())
+  amount      Decimal   @db.Decimal(15, 2)
+  date        DateTime  @default(now())
+  month       DateTime?
+  description String?   @db.VarChar(511)
+  updatedAt   DateTime  @default(now())
+  reason      Reason    @relation(fields: [reasonId], references: [id])
   reasonId    Int
 }

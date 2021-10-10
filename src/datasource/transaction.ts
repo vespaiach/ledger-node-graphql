@@ -1,5 +1,4 @@
 import { DataSource } from 'apollo-datasource';
-
 import { PrismaClient, Prisma } from '@prisma/client';
 
 import { TransactionModel } from 'src/schema/types';
@@ -114,11 +113,12 @@ export class TransactionDS extends DataSource {
         description: true,
         updatedAt: true,
         reasonId: true,
+        month: true,
       },
     });
   }
 
-  public delateTransaction(id: number): Promise<TransactionModel> {
+  public deleteTransaction(id: number): Promise<TransactionModel> {
     return this.dbClient.transaction.delete({ where: { id } });
   }
 
@@ -131,6 +131,7 @@ export class TransactionDS extends DataSource {
     return this.dbClient.transaction.create({
       data: {
         date,
+        month: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0),
         amount,
         reasonId,
         description,
@@ -143,6 +144,7 @@ export class TransactionDS extends DataSource {
         description: true,
         updatedAt: true,
         reasonId: true,
+        month: true,
       },
     });
   }
@@ -161,15 +163,20 @@ export class TransactionDS extends DataSource {
       description: Maybe<string>;
     }
   ): Promise<TransactionModel> {
-    const data: { [key in string]: Date | number | string | null } = {};
+    const data: Prisma.TransactionUpdateInput = {};
     if (date) {
       data.date = date;
+      data.month = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
     }
     if (amount !== null && amount !== undefined) {
       data.amount = amount;
     }
     if (reasonId) {
-      data.reasonId = reasonId;
+      data.reason = {
+        connect: {
+          id: reasonId,
+        },
+      };
     }
     if (description !== undefined) {
       data.description = description;
@@ -188,6 +195,7 @@ export class TransactionDS extends DataSource {
         description: true,
         updatedAt: true,
         reasonId: true,
+        month: true,
       },
     });
   }
