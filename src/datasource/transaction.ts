@@ -101,6 +101,53 @@ export class TransactionDS extends DataSource {
     return this.dbClient.transaction.count({ where });
   }
 
+  public async getMonthGroups(
+    fromDate: Maybe<Date>,
+    toDate: Maybe<Date>,
+    fromAmount: Maybe<number>,
+    toAmount: Maybe<number>,
+    reason: Maybe<number>
+  ): Promise<{ month: Date; count: number }[]> {
+    const where: Prisma.TransactionWhereInput = {};
+
+    if (fromDate) {
+      where.date = <Prisma.DateTimeFilter>(where.date || {});
+      where.date.gte = fromDate;
+    }
+    if (toDate) {
+      where.date = <Prisma.DateTimeFilter>(where.date || {});
+      where.date.lte = toDate;
+    }
+
+    if (fromAmount) {
+      where.amount = <Prisma.DecimalFilter>(where.amount || {});
+      where.amount.gte = fromAmount;
+    }
+    if (toAmount) {
+      where.amount = <Prisma.DecimalFilter>(where.amount || {});
+      where.amount.lte = toAmount;
+    }
+
+    if (reason) {
+      where.reasonId = reason;
+    }
+
+    const result = await this.dbClient.transaction.groupBy({
+      by: ['month'],
+      where,
+      _count: {
+        id: true,
+      },
+      orderBy: {
+        month: 'desc',
+      },
+    });
+
+    return result
+      .filter((r) => !!r.month)
+      .map((r) => ({ month: r.month as Date, count: r._count.id }));
+  }
+
   public getTransaction(id: number): Promise<TransactionModel | null> {
     return this.dbClient.transaction.findUnique({
       where: {
@@ -131,7 +178,9 @@ export class TransactionDS extends DataSource {
     return this.dbClient.transaction.create({
       data: {
         date,
-        month: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0),
+        month: new Date(
+          `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01T00:00:00.000Z`
+        ),
         amount,
         reasonId,
         description,
@@ -166,7 +215,9 @@ export class TransactionDS extends DataSource {
     const data: Prisma.TransactionUpdateInput = {};
     if (date) {
       data.date = date;
-      data.month = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0);
+      data.month = new Date(
+        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01T00:00:00.000Z`
+      );
     }
     if (amount !== null && amount !== undefined) {
       data.amount = amount;

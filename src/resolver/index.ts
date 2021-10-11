@@ -65,11 +65,11 @@ export const resolvers: Resolvers = {
       return transactionDs.getTransaction(id);
     },
 
-    getTotalPages: async (_, args, context) => {
-      const { dateFrom, dateTo, amountFrom, amountTo, reason, limit } = validateAndSanitize(args);
+    getPagingData: async (_, args, context) => {
+      const { dateFrom, dateTo, amountFrom, amountTo, reason } = validateAndSanitize(args);
       const { transactionDs } = context.dataSources;
 
-      const total = await transactionDs.countTransactions(
+      const months = await transactionDs.getMonthGroups(
         dateFrom,
         dateTo,
         amountFrom,
@@ -78,8 +78,8 @@ export const resolvers: Resolvers = {
       );
 
       return {
-        totalPages: Math.floor(total / limit) + (total % limit === 0 ? 0 : 1),
-        totalRecords: total,
+        totalRecords: months.reduce((a, m) => a + m.count, 0),
+        months,
       };
     },
   },

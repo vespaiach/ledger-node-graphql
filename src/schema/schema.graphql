@@ -25,6 +25,14 @@ input TransactionFilterInput {
   limit: Int
 }
 
+input TransactionCountInput {
+  amountFrom: Float
+  amountTo: Float
+  dateFrom: String @constraint(format: "date")
+  dateTo: String @constraint(format: "date")
+  reason: Int
+}
+
 input TransactionInput {
   id: Int
   amount: Float
@@ -33,16 +41,21 @@ input TransactionInput {
   reason: String
 }
 
+type MonthCount {
+  month: Date!
+  count: Int!
+}
+
 type Pagination {
   totalRecords: Int!
-  totalPages: Int!
+  months: [MonthCount]!
 }
 
 type Query {
   reasons: [Reason]!
   transactions(input: TransactionFilterInput): [Transaction]!
   transactionById(id: Int!): Transaction
-  getTotalPages(input: TransactionFilterInput): Pagination!
+  getPagingData(input: TransactionCountInput): Pagination!
 }
 
 type Mutation {
