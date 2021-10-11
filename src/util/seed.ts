@@ -67,6 +67,7 @@ async function createTransactions(reasons: { id: number }[], factor: number, loo
       description: faker.lorem.sentence(),
       reasonId: reasons[reasonInd].id,
       updatedAt: date,
+      month: new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0),
     });
   }
 

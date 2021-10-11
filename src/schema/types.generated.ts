@@ -15,6 +15,12 @@ export type Scalars = {
   Date: Date;
 };
 
+export type MonthCount = {
+  __typename?: 'MonthCount';
+  month: Scalars['Date'];
+  count: Scalars['Int'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   mutateTransaction?: Maybe<Transaction>;
@@ -34,7 +40,7 @@ export type MutationDeleteTransactionArgs = {
 export type Pagination = {
   __typename?: 'Pagination';
   totalRecords: Scalars['Int'];
-  totalPages: Scalars['Int'];
+  months: Array<Maybe<MonthCount>>;
 };
 
 export type Query = {
@@ -42,7 +48,7 @@ export type Query = {
   reasons: Array<Maybe<Reason>>;
   transactions: Array<Maybe<Transaction>>;
   transactionById?: Maybe<Transaction>;
-  getTotalPages: Pagination;
+  getPagingData: Pagination;
 };
 
 
@@ -56,8 +62,8 @@ export type QueryTransactionByIdArgs = {
 };
 
 
-export type QueryGetTotalPagesArgs = {
-  input?: Maybe<TransactionFilterInput>;
+export type QueryGetPagingDataArgs = {
+  input?: Maybe<TransactionCountInput>;
 };
 
 export type Reason = {
@@ -75,6 +81,14 @@ export type Transaction = {
   description?: Maybe<Scalars['String']>;
   updatedAt: Scalars['Date'];
   reason: Reason;
+};
+
+export type TransactionCountInput = {
+  amountFrom?: Maybe<Scalars['Float']>;
+  amountTo?: Maybe<Scalars['Float']>;
+  dateFrom?: Maybe<Scalars['String']>;
+  dateTo?: Maybe<Scalars['String']>;
+  reason?: Maybe<Scalars['Int']>;
 };
 
 export type TransactionFilterInput = {
@@ -166,15 +180,17 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   Date: ResolverTypeWrapper<Scalars['Date']>;
+  MonthCount: ResolverTypeWrapper<MonthCount>;
+  Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
-  Int: ResolverTypeWrapper<Scalars['Int']>;
   Pagination: ResolverTypeWrapper<Pagination>;
   Query: ResolverTypeWrapper<{}>;
   Reason: ResolverTypeWrapper<ReasonModel>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Transaction: ResolverTypeWrapper<TransactionModel>;
   Float: ResolverTypeWrapper<Scalars['Float']>;
+  TransactionCountInput: TransactionCountInput;
   TransactionFilterInput: TransactionFilterInput;
   TransactionInput: TransactionInput;
 }>;
@@ -182,15 +198,17 @@ export type ResolversTypes = ResolversObject<{
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   Date: Scalars['Date'];
+  MonthCount: MonthCount;
+  Int: Scalars['Int'];
   Mutation: {};
   Boolean: Scalars['Boolean'];
-  Int: Scalars['Int'];
   Pagination: Pagination;
   Query: {};
   Reason: ReasonModel;
   String: Scalars['String'];
   Transaction: TransactionModel;
   Float: Scalars['Float'];
+  TransactionCountInput: TransactionCountInput;
   TransactionFilterInput: TransactionFilterInput;
   TransactionInput: TransactionInput;
 }>;
@@ -199,6 +217,12 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
   name: 'Date';
 }
 
+export type MonthCountResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['MonthCount'] = ResolversParentTypes['MonthCount']> = ResolversObject<{
+  month?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type MutationResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   mutateTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<MutationMutateTransactionArgs, 'input'>>;
   deleteTransaction?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTransactionArgs, 'id'>>;
@@ -206,7 +230,7 @@ export type MutationResolvers<ContextType = CustomContext, ParentType extends Re
 
 export type PaginationResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Pagination'] = ResolversParentTypes['Pagination']> = ResolversObject<{
   totalRecords?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  totalPages?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  months?: Resolver<Array<Maybe<ResolversTypes['MonthCount']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -214,7 +238,7 @@ export type QueryResolvers<ContextType = CustomContext, ParentType extends Resol
   reasons?: Resolver<Array<Maybe<ResolversTypes['Reason']>>, ParentType, ContextType>;
   transactions?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsArgs, never>>;
   transactionById?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<QueryTransactionByIdArgs, 'id'>>;
-  getTotalPages?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType, RequireFields<QueryGetTotalPagesArgs, never>>;
+  getPagingData?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType, RequireFields<QueryGetPagingDataArgs, never>>;
 }>;
 
 export type ReasonResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Reason'] = ResolversParentTypes['Reason']> = ResolversObject<{
@@ -236,6 +260,7 @@ export type TransactionResolvers<ContextType = CustomContext, ParentType extends
 
 export type Resolvers<ContextType = CustomContext> = ResolversObject<{
   Date?: GraphQLScalarType;
+  MonthCount?: MonthCountResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Pagination?: PaginationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;

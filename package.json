@@ -27,8 +27,10 @@
     "dev": "ts-node-dev --clear --debounce 1300 --prefer-ts -r tsconfig-paths/register src/index.ts",
     "build": "tsc -p . && tscpaths -p tsconfig.json -s ./src -o ./build",
     "gen": "graphql-codegen --config codegen.yml",
-    "seed:ts": "ts-node --project tsconfig.json ./src/seed.ts",
-    "seed": "node ./build/seed.js",
+    "seed:ts": "ts-node --project tsconfig.json ./src/util/seed.ts",
+    "month:ts": "ts-node --project tsconfig.json ./src/util/saveMonth.ts",
+    "seed": "node ./build/util/seed.js",
+    "month": "node ./build/util/saveMonth.ts",
     "start": "node ./build/index.js"
   },
   "devDependencies": {

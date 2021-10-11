@@ -37,6 +37,17 @@ yarn run dev
 
 # Heroku deployment
 
+## Run locally
+
+  1. Create `.env` file, and input below variables:
+```
+    LEDGER_DATABASE_URL=<your Postgres database url>
+    NODE_ENV=[development|production]
+    PORT=[your application port (default: 3000)]
+```
+  2. Run `yarn install`
+  3. Run `yarn dev`
+
 ## Create a new app on Heroku
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/vespaiach/ledger-graphql)
@@ -53,8 +64,17 @@ heroku run npx prisma migrate deploy -a <your_heroku_app_name>
 ```
 
 
-## Seed database
+## Other commands
 
-```
-heroku run yarn seed -a <your_heroku_app_name>
-```
+### Seeding
+  `yarn seed -a <your_heroku_app_name>`
+
+  On Heroku platform:
+  `heroku run yarn seed -a <your_heroku_app_name>`
+
+### Generating Typescript code
+  `yarn gen`
+
+### Building project
+  `yarn build`
+
