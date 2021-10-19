@@ -7,6 +7,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum GroupBy {
+  Month
+  Reason
+}
+
 model Reason {
   id           Int           @id @default(autoincrement())
   text         String        @unique @db.VarChar(255)
@@ -15,12 +20,35 @@ model Reason {
 }
 
 model Transaction {
-  id          Int       @id @default(autoincrement())
-  amount      Decimal   @db.Decimal(15, 2)
-  date        DateTime  @default(now())
-  month       DateTime?
-  description String?   @db.VarChar(511)
-  updatedAt   DateTime  @default(now())
-  reason      Reason    @relation(fields: [reasonId], references: [id])
-  reasonId    Int
+  id           Int            @id @default(autoincrement())
+  amount       Decimal        @db.Decimal(15, 2)
+  date         DateTime       @default(now())
+  month        DateTime?
+  description  String?        @db.VarChar(511)
+  updatedAt    DateTime       @default(now())
+  reason       Reason         @relation(fields: [reasonId], references: [id])
+  reasonId     Int
+  FilterResult FilterResult[]
+}
+
+model FilterInput {
+  id           Int            @id @default(autoincrement())
+  amountFrom   Decimal?       @db.Decimal(15, 2)
+  amountTo     Decimal?       @db.Decimal(15, 2)
+  dateFrom     DateTime?
+  dateTo       DateTime?
+  reasonId     Int?
+  groupBy      GroupBy?       @default(Month)
+  active       Boolean        @default(false)
+  FilterResult FilterResult[]
+}
+
+model FilterResult {
+  id            Int          @id @default(autoincrement())
+  filterInput   FilterInput  @relation(fields: [filterInputId], references: [id])
+  filterInputId Int
+  index         Int
+  groupBy       Json?
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+  transactionId Int
 }

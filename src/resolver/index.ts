@@ -14,17 +14,12 @@ async function lookupReason(reason: string, reasonDs: ReasonDS): Promise<ReasonM
   return reasonInfo;
 }
 
-const DEFAULT_OFFSET = 0;
-const DEFAULT_LIMIT = 100;
-
 function validateAndSanitize(args) {
   const dateFrom = args.input?.dateFrom ? new Date(args.input.dateFrom) : null;
   const dateTo = args.input?.dateTo ? new Date(args.input.dateTo) : null;
   const amountFrom = args.input?.amountFrom;
   const amountTo = args.input?.amountTo;
   const reason = args.input?.reason;
-  const offset = args.input?.offset ?? DEFAULT_OFFSET;
-  const limit = args.input?.limit ?? DEFAULT_LIMIT;
 
   if (dateFrom && dateTo && dateFrom > dateTo) {
     throw new UserInputError('Date from must be less than date to');
@@ -33,7 +28,7 @@ function validateAndSanitize(args) {
     throw new UserInputError('Amount from must be less than amount to');
   }
 
-  return { dateFrom, dateTo, amountFrom, amountTo, reason, offset, limit };
+  return { dateFrom, dateTo, amountFrom, amountTo, reason, groupBy: args.input?.groupBy };
 }
 
 export const resolvers: Resolvers = {
@@ -129,6 +124,22 @@ export const resolvers: Resolvers = {
 
       const deleted = await transactionDs.deleteTransaction(id);
       return Boolean(deleted.id);
+    },
+
+    filterTransaction: async (_, args, context) => {
+      const { dateFrom, dateTo, amountFrom, amountTo, reason, groupBy } = validateAndSanitize(args);
+      const { transactionDs } = context.dataSources;
+
+      return {
+        totalRecords: await transactionDs.updateTransactionFilter(
+          dateFrom,
+          dateTo,
+          amountFrom,
+          amountTo,
+          reason,
+          groupBy
+        ),
+      };
     },
   },
 

@@ -3,6 +3,7 @@ import { PrismaClient, Prisma } from '@prisma/client';
 
 import { TransactionModel } from 'src/schema/types';
 import { Maybe } from 'graphql/jsutils/Maybe';
+import { GroupBy } from 'src/schema/types.generated';
 
 export class TransactionDS extends DataSource {
   private dbClient: PrismaClient;
@@ -67,38 +68,117 @@ export class TransactionDS extends DataSource {
     return this.dbClient.transaction.findMany(query);
   }
 
-  public countTransactions(
-    fromDate: Maybe<Date>,
-    toDate: Maybe<Date>,
-    fromAmount: Maybe<number>,
-    toAmount: Maybe<number>,
-    reason: Maybe<number>
+  public async updateTransactionFilter(
+    dateFrom: Maybe<Date>,
+    dateTo: Maybe<Date>,
+    amountFrom: Maybe<number>,
+    amountTo: Maybe<number>,
+    reason: Maybe<number>,
+    groupBy?: GroupBy
   ): Promise<number> {
+    const whereStr: string[] = [];
     const where: Prisma.TransactionWhereInput = {};
 
-    if (fromDate) {
+    if (dateFrom) {
+      whereStr.push(`date >= ${dateFrom.toISOString()}`);
+
       where.date = <Prisma.DateTimeFilter>(where.date || {});
-      where.date.gte = fromDate;
+      where.date.gte = dateFrom;
     }
-    if (toDate) {
+    if (dateTo) {
+      whereStr.push(`date <= ${dateTo.toISOString()}`);
+
       where.date = <Prisma.DateTimeFilter>(where.date || {});
-      where.date.lte = toDate;
+      where.date.lte = dateTo;
     }
 
-    if (fromAmount) {
+    if (amountFrom) {
+      whereStr.push(`amount >= ${amountFrom}`);
+
       where.amount = <Prisma.DecimalFilter>(where.amount || {});
-      where.amount.gte = fromAmount;
+      where.amount.gte = amountFrom;
     }
-    if (toAmount) {
+    if (amountTo) {
+      whereStr.push(`amount <= ${amountTo}`);
+
       where.amount = <Prisma.DecimalFilter>(where.amount || {});
-      where.amount.lte = toAmount;
+      where.amount.lte = amountTo;
     }
 
     if (reason) {
+      whereStr.push(`reasonId = ${reason}`);
+
       where.reasonId = reason;
     }
 
-    return this.dbClient.transaction.count({ where });
+    await this.dbClient.filterInput.updateMany({ data: { active: false } });
+
+    const filterObj = await this.dbClient.filterInput.create({
+      data: {
+        dateFrom,
+        dateTo,
+        amountFrom,
+        amountTo,
+        reasonId: reason,
+        groupBy,
+      },
+    });
+
+    let totalRecords = 0;
+    if (groupBy === GroupBy.Month) {
+      const monthGroups = await this.dbClient.transaction.groupBy({
+        by: ['month'],
+        where,
+        _count: {
+          id: true,
+        },
+        _sum: {
+          amount: true,
+        },
+        orderBy: {
+          month: 'desc',
+        },
+      });
+
+      monthGroups
+        .filter((r) => !!r.month)
+        .forEach(async (m, i) => {
+          const groupBy = { month: m.month, totalRecords: m._count.id, totalAmount: m._sum.amount };
+          totalRecords += (await this.dbClient.$executeRaw`
+            INSERT INTO FilterResult(filterInputId, index, groupBy, transactionId)
+            VALUES (${filterObj.id}, ${totalRecords + i + 1}, ${JSON.stringify(groupBy)}, null);
+            INSERT INTO FilterResult(filterInputId, index, groupBy, transactionId)
+            SELECT ${filterObj.id}, ROW_NUMBER() OVER (ORDER BY id ASC), null, id FROM Transaction
+            ${whereStr.length > 0 ? ` WHERE ${whereStr.join(' AND ')}` : ''};`) as number;
+        });
+    } else {
+      const reasonGroups = await this.dbClient.transaction.groupBy({
+        by: ['reasonId'],
+        where,
+        _count: {
+          id: true,
+        },
+        _sum: {
+          amount: true,
+        },
+        orderBy: {
+          reasonId: 'asc',
+        },
+      });
+
+      reasonGroups
+        .forEach(async (r, i) => {
+          const groupBy = { reaosn: r, totalRecords: r._count.id, totalAmount: r._sum.amount };
+          totalRecords += (await this.dbClient.$executeRaw`
+            INSERT INTO FilterResult(filterInputId, index, groupBy, transactionId)
+            VALUES (${filterObj.id}, ${totalRecords + i + 1}, ${JSON.stringify(groupBy)}, null);
+            INSERT INTO FilterResult(filterInputId, index, groupBy, transactionId)
+            SELECT ${filterObj.id}, ROW_NUMBER() OVER (ORDER BY id ASC), null, id FROM Transaction
+            ${whereStr.length > 0 ? ` WHERE ${whereStr.join(' AND ')}` : ''};`) as number;
+        });
+    }
+
+    return totalRecords;
   }
 
   public async getMonthGroups(

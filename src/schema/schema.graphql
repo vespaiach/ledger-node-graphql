@@ -1,5 +1,10 @@
 scalar Date
 
+enum GroupBy {
+  Month
+  Reason
+}
+
 type Transaction {
   id: Int!
   amount: Float!
@@ -21,16 +26,7 @@ input TransactionFilterInput {
   dateFrom: String @constraint(format: "date")
   dateTo: String @constraint(format: "date")
   reason: Int
-  offset: Int
-  limit: Int
-}
-
-input TransactionCountInput {
-  amountFrom: Float
-  amountTo: Float
-  dateFrom: String @constraint(format: "date")
-  dateTo: String @constraint(format: "date")
-  reason: Int
+  groupBy: GroupBy
 }
 
 input TransactionInput {
@@ -41,24 +37,18 @@ input TransactionInput {
   reason: String
 }
 
-type MonthCount {
-  month: Date!
-  count: Int!
-}
-
 type Pagination {
   totalRecords: Int!
-  months: [MonthCount]!
 }
 
 type Query {
   reasons: [Reason]!
-  transactions(input: TransactionFilterInput): [Transaction]!
+  transactions(startIndex: Int!, endIndex: Int): [Transaction]!
   transactionById(id: Int!): Transaction
-  getPagingData(input: TransactionCountInput): Pagination!
 }
 
 type Mutation {
   mutateTransaction(input: TransactionInput!): Transaction
   deleteTransaction(id: Int!): Boolean
+  filterTransaction(input: TransactionFilterInput): Pagination!
 }
