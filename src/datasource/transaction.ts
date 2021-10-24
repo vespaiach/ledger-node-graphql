@@ -29,61 +29,27 @@ export class TransactionDS extends DataSource {
     dateTo: Maybe<Date>,
     amountFrom: Maybe<number>,
     amountTo: Maybe<number>,
-    reason: Maybe<number>,
     groupBy?: GroupBy
-  ): Promise<{ totalRecords: number; groups: GroupRow[] }> {
-    const whereStr: string[] = [];
+  ): Promise<{ orders: number[]; groups: GroupRow[] }> {
     const where: Prisma.TransactionWhereInput = {};
 
     if (dateFrom) {
-      whereStr.push(`date >= ${dateFrom.toISOString()}`);
-
       where.date = <Prisma.DateTimeFilter>(where.date || {});
       where.date.gte = dateFrom;
     }
     if (dateTo) {
-      whereStr.push(`date <= ${dateTo.toISOString()}`);
-
       where.date = <Prisma.DateTimeFilter>(where.date || {});
       where.date.lte = dateTo;
     }
 
     if (amountFrom) {
-      whereStr.push(`amount >= ${amountFrom}`);
-
       where.amount = <Prisma.DecimalFilter>(where.amount || {});
       where.amount.gte = amountFrom;
     }
     if (amountTo) {
-      whereStr.push(`amount <= ${amountTo}`);
-
       where.amount = <Prisma.DecimalFilter>(where.amount || {});
       where.amount.lte = amountTo;
     }
-
-    if (reason) {
-      whereStr.push(`reason_id = ${reason}`);
-
-      where.reasonId = reason;
-    }
-
-    await this.dbClient.filterInput.deleteMany();
-
-    const filterObj = await this.dbClient.filterInput.create({
-      data: {
-        dateFrom,
-        dateTo,
-        amountFrom,
-        amountTo,
-        reasonId: reason,
-        groupBy,
-      },
-    });
-
-    await this.dbClient.$executeRaw`ALTER SEQUENCE transactions_id_seq RESTART`;
-
-    let totalRecords = 0;
-    const groups: GroupRow[] = [];
 
     if (groupBy === GroupBy.Month) {
       const monthGroups = await this.dbClient.transaction.groupBy({
@@ -100,35 +66,26 @@ export class TransactionDS extends DataSource {
         },
       });
 
-      monthGroups
-        .filter((r) => !!r.month)
-        .forEach(async (m) => {
-          const groupBy = {
-            month: m.month?.toISOString(),
-            offset: totalRecords,
-            amount: m._sum.amount?.e || 0,
-          };
-          groups.push({
-            month: m.month,
-            offset: totalRecords,
-            amount: m._sum.amount?.e || 0,
-          });
-          try {
-            if (whereStr.length > 0) {
-              totalRecords += (await this.dbClient
-                .$executeRaw`
-                INSERT INTO filter_results(filter_input_id, group_by, transaction_id) VALUES (${filterObj.id}, ${JSON.stringify(groupBy)}, null);
-                INSERT INTO filter_results(filter_input_id, group_by, transaction_id) SELECT ${
-                filterObj.id
-              }, null, id FROM transactions WHERE ${whereStr.join(' AND ')};`) as number;
-            } else {
-              totalRecords += (await this.dbClient
-                .$executeRaw`INSERT INTO filter_results(filter_input_id, group_by, transaction_id) SELECT ${filterObj.id}, null, id FROM transactions;`) as number;
-            }
-          } catch (e) {
-            console.error(e);
-          }
-        });
+      const ids = await this.dbClient.transaction.findMany({
+        where,
+        select: { id: true },
+        orderBy: {
+          date: 'desc',
+        },
+      });
+
+      const groups: GroupRow[] = [];
+      let offset = 0;
+      monthGroups.forEach((m) => {
+        const item = { month: m.month, offset, amount: m._sum.amount?.e || 0 };
+        offset += m._count.id;
+        groups.push(item);
+      });
+
+      return {
+        orders: ids.map((it) => it.id),
+        groups,
+      };
     } else {
       const reasonGroups = await this.dbClient.transaction.groupBy({
         by: ['reasonId'],
@@ -144,80 +101,35 @@ export class TransactionDS extends DataSource {
         },
       });
 
-      reasonGroups.forEach(async (r, i) => {
-        const groupBy = { reason: r, totalRecords: r._count.id, totalAmount: r._sum.amount };
-        totalRecords += (await this.dbClient.$executeRaw`
-            INSERT INTO filter_result(filter_input_id, group_by, transaction_id)
-            VALUES (${filterObj.id}, ${totalRecords + i + 1}, ${JSON.stringify(groupBy)}, null);
-            INSERT INTO filter_result(filter_input_id, group_by, transaction_id)
-            SELECT ${filterObj.id}, null, id FROM transaction
-            ${whereStr.length > 0 ? ` WHERE ${whereStr.join(' AND ')}` : ''};`) as number;
+      const ids = await this.dbClient.transaction.findMany({
+        where,
+        select: { id: true },
+        orderBy: {
+          reasonId: 'asc',
+        },
       });
-    }
 
-    return { totalRecords, groups };
+      const groups: GroupRow[] = [];
+      let offset = 0;
+      reasonGroups.forEach((m) => {
+        const item = { reason: m.reasonId, offset, amount: m._sum.amount?.e || 0 };
+        offset += m._count.id;
+        groups.push(item);
+      });
+
+      return {
+        orders: ids.map((it) => it.id),
+        groups,
+      };
+    }
   }
 
-  public async getMonthGroups(
-    fromDate: Maybe<Date>,
-    toDate: Maybe<Date>,
-    fromAmount: Maybe<number>,
-    toAmount: Maybe<number>,
-    reason: Maybe<number>
-  ): Promise<{ month: Date; count: number }[]> {
-    const where: Prisma.TransactionWhereInput = {};
-
-    if (fromDate) {
-      where.date = <Prisma.DateTimeFilter>(where.date || {});
-      where.date.gte = fromDate;
-    }
-    if (toDate) {
-      where.date = <Prisma.DateTimeFilter>(where.date || {});
-      where.date.lte = toDate;
-    }
-
-    if (fromAmount) {
-      where.amount = <Prisma.DecimalFilter>(where.amount || {});
-      where.amount.gte = fromAmount;
-    }
-    if (toAmount) {
-      where.amount = <Prisma.DecimalFilter>(where.amount || {});
-      where.amount.lte = toAmount;
-    }
-
-    if (reason) {
-      where.reasonId = reason;
-    }
-
-    const result = await this.dbClient.transaction.groupBy({
-      by: ['month'],
-      where,
-      _count: {
-        id: true,
-      },
-      orderBy: {
-        month: 'desc',
-      },
-    });
-
-    return result
-      .filter((r) => !!r.month)
-      .map((r) => ({ month: r.month as Date, count: r._count.id }));
-  }
-
-  public getTransaction(id: number): Promise<TransactionModel | null> {
-    return this.dbClient.transaction.findUnique({
+  public getTransactionByIds(ids: number[]): Promise<TransactionModel[]> {
+    return this.dbClient.transaction.findMany({
       where: {
-        id,
-      },
-      select: {
-        id: true,
-        amount: true,
-        date: true,
-        description: true,
-        updatedAt: true,
-        reasonId: true,
-        month: true,
+        id: {
+          in: ids,
+        },
       },
     });
   }

@@ -24,40 +24,14 @@ model Reason {
 }
 
 model Transaction {
-  id           Int            @id @default(autoincrement())
-  amount       Decimal        @db.Decimal(15, 2)
-  date         DateTime       @default(now())
-  month        DateTime?
-  description  String?        @db.VarChar(511)
-  updatedAt    DateTime       @default(now()) @map("updated_at")
-  reason       Reason         @relation(fields: [reasonId], references: [id])
-  reasonId     Int            @map("reason_id")
-  FilterResult FilterResult[]
+  id          Int       @id @default(autoincrement())
+  amount      Decimal   @db.Decimal(15, 2)
+  date        DateTime  @default(now())
+  month       DateTime?
+  description String?   @db.VarChar(511)
+  updatedAt   DateTime  @default(now()) @map("updated_at")
+  reason      Reason    @relation(fields: [reasonId], references: [id])
+  reasonId    Int       @map("reason_id")
 
   @@map("transactions")
-}
-
-model FilterInput {
-  id           Int            @id @default(autoincrement())
-  amountFrom   Decimal?       @map("amount_from") @db.Decimal(15, 2)
-  amountTo     Decimal?       @map("amount_to") @db.Decimal(15, 2)
-  dateFrom     DateTime?      @map("date_from")
-  dateTo       DateTime?      @map("date_to")
-  reasonId     Int?           @map("reason_id")
-  groupBy      GroupBy?       @default(Month) @map("group_by")
-  active       Boolean        @default(false)
-  FilterResult FilterResult[]
-
-  @@map("filter_inputs")
-}
-
-model FilterResult {
-  id            Int          @id @default(autoincrement())
-  filterInput   FilterInput  @relation(fields: [filterInputId], references: [id], onDelete: Cascade)
-  filterInputId Int          @map("filter_input_id")
-  groupBy       Json?        @map("group_by")
-  transaction   Transaction? @relation(fields: [transactionId], references: [id], onDelete: Cascade)
-  transactionId Int          @map("transaction_id")
-
-  @@map("filter_results")
 }

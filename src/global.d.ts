@@ -1,6 +1,6 @@
 interface GroupRow {
   month?: Date | null;
-  reason?: string;
+  reason?: number | null;
   amount: number;
-  offset: number
+  offset: number;
 }

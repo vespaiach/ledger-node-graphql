@@ -45,10 +45,22 @@ export const resolvers: Resolvers = {
       return await transactionDs.getTransactions(startIndex, stopIndex);
     },
 
-    transactionById: (_, args, context) => {
-      const { id } = args;
+    transactionByIds: (_, args, context) => {
+      const { ids } = args;
       const { transactionDs } = context.dataSources;
-      return transactionDs.getTransaction(id);
+      return transactionDs.getTransactionByIds(ids);
+    },
+
+    filterTransaction: async (_, args, context) => {
+      const { dateFrom, dateTo, amountFrom, amountTo, groupBy } = validateAndSanitize(args);
+      const { transactionDs } = context.dataSources;
+      return await transactionDs.updateTransactionFilter(
+        dateFrom,
+        dateTo,
+        amountFrom,
+        amountTo,
+        groupBy
+      );
     },
   },
 
@@ -97,22 +109,6 @@ export const resolvers: Resolvers = {
 
       const deleted = await transactionDs.deleteTransaction(id);
       return Boolean(deleted.id);
-    },
-
-    filterTransaction: async (_, args, context) => {
-      const { dateFrom, dateTo, amountFrom, amountTo, reason, groupBy } = validateAndSanitize(args);
-      const { transactionDs } = context.dataSources;
-      return {
-        ...(await transactionDs.updateTransactionFilter(
-          dateFrom,
-          dateTo,
-          amountFrom,
-          amountTo,
-          reason,
-          groupBy
-        )),
-        groupBy,
-      };
     },
   },
 

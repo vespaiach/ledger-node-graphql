@@ -17,7 +17,7 @@ export type Scalars = {
 
 export type Aggregation = {
   __typename?: 'Aggregation';
-  reason?: Maybe<Scalars['String']>;
+  reason?: Maybe<Scalars['Int']>;
   month?: Maybe<Scalars['Date']>;
   amount: Scalars['Float'];
   offset: Scalars['Int'];
@@ -32,7 +32,6 @@ export type Mutation = {
   __typename?: 'Mutation';
   mutateTransaction?: Maybe<Transaction>;
   deleteTransaction?: Maybe<Scalars['Boolean']>;
-  filterTransaction: Pagination;
 };
 
 
@@ -45,15 +44,9 @@ export type MutationDeleteTransactionArgs = {
   id: Scalars['Int'];
 };
 
-
-export type MutationFilterTransactionArgs = {
-  input?: Maybe<TransactionFilterInput>;
-};
-
 export type Pagination = {
   __typename?: 'Pagination';
-  totalRecords: Scalars['Int'];
-  groupBy: GroupBy;
+  orders: Array<Maybe<Scalars['Int']>>;
   groups: Array<Maybe<Aggregation>>;
 };
 
@@ -61,7 +54,8 @@ export type Query = {
   __typename?: 'Query';
   reasons: Array<Maybe<Reason>>;
   transactions: Array<Maybe<Transaction>>;
-  transactionById?: Maybe<Transaction>;
+  transactionByIds: Array<Maybe<Transaction>>;
+  filterTransaction: Pagination;
 };
 
 
@@ -71,8 +65,13 @@ export type QueryTransactionsArgs = {
 };
 
 
-export type QueryTransactionByIdArgs = {
-  id: Scalars['Int'];
+export type QueryTransactionByIdsArgs = {
+  ids: Array<Scalars['Int']>;
+};
+
+
+export type QueryFilterTransactionArgs = {
+  input?: Maybe<TransactionFilterInput>;
 };
 
 export type Reason = {
@@ -97,7 +96,6 @@ export type TransactionFilterInput = {
   amountTo?: Maybe<Scalars['Float']>;
   dateFrom?: Maybe<Scalars['String']>;
   dateTo?: Maybe<Scalars['String']>;
-  reason?: Maybe<Scalars['Int']>;
   groupBy?: Maybe<GroupBy>;
 };
 
@@ -180,9 +178,8 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   Aggregation: ResolverTypeWrapper<Aggregation>;
-  String: ResolverTypeWrapper<Scalars['String']>;
-  Float: ResolverTypeWrapper<Scalars['Float']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
+  Float: ResolverTypeWrapper<Scalars['Float']>;
   Date: ResolverTypeWrapper<Scalars['Date']>;
   GroupBy: GroupBy;
   Mutation: ResolverTypeWrapper<{}>;
@@ -190,6 +187,7 @@ export type ResolversTypes = ResolversObject<{
   Pagination: ResolverTypeWrapper<Pagination>;
   Query: ResolverTypeWrapper<{}>;
   Reason: ResolverTypeWrapper<ReasonModel>;
+  String: ResolverTypeWrapper<Scalars['String']>;
   Transaction: ResolverTypeWrapper<TransactionModel>;
   TransactionFilterInput: TransactionFilterInput;
   TransactionInput: TransactionInput;
@@ -198,22 +196,22 @@ export type ResolversTypes = ResolversObject<{
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   Aggregation: Aggregation;
-  String: Scalars['String'];
-  Float: Scalars['Float'];
   Int: Scalars['Int'];
+  Float: Scalars['Float'];
   Date: Scalars['Date'];
   Mutation: {};
   Boolean: Scalars['Boolean'];
   Pagination: Pagination;
   Query: {};
   Reason: ReasonModel;
+  String: Scalars['String'];
   Transaction: TransactionModel;
   TransactionFilterInput: TransactionFilterInput;
   TransactionInput: TransactionInput;
 }>;
 
 export type AggregationResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Aggregation'] = ResolversParentTypes['Aggregation']> = ResolversObject<{
-  reason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  reason?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   month?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   amount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
   offset?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -227,12 +225,10 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 export type MutationResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   mutateTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<MutationMutateTransactionArgs, 'input'>>;
   deleteTransaction?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTransactionArgs, 'id'>>;
-  filterTransaction?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType, RequireFields<MutationFilterTransactionArgs, never>>;
 }>;
 
 export type PaginationResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Pagination'] = ResolversParentTypes['Pagination']> = ResolversObject<{
-  totalRecords?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  groupBy?: Resolver<ResolversTypes['GroupBy'], ParentType, ContextType>;
+  orders?: Resolver<Array<Maybe<ResolversTypes['Int']>>, ParentType, ContextType>;
   groups?: Resolver<Array<Maybe<ResolversTypes['Aggregation']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -240,7 +236,8 @@ export type PaginationResolvers<ContextType = CustomContext, ParentType extends 
 export type QueryResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   reasons?: Resolver<Array<Maybe<ResolversTypes['Reason']>>, ParentType, ContextType>;
   transactions?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionsArgs, 'startIndex' | 'stopIndex'>>;
-  transactionById?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<QueryTransactionByIdArgs, 'id'>>;
+  transactionByIds?: Resolver<Array<Maybe<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryTransactionByIdsArgs, 'ids'>>;
+  filterTransaction?: Resolver<ResolversTypes['Pagination'], ParentType, ContextType, RequireFields<QueryFilterTransactionArgs, never>>;
 }>;
 
 export type ReasonResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Reason'] = ResolversParentTypes['Reason']> = ResolversObject<{
