@@ -3,6 +3,7 @@ import { PrismaClient, Prisma } from '@prisma/client';
 
 import { TransactionModel } from 'src/schema/types';
 import { Maybe } from 'graphql/jsutils/Maybe';
+import { GroupBy } from 'src/schema/types.generated';
 
 export class TransactionDS extends DataSource {
   private dbClient: PrismaClient;
@@ -12,155 +13,123 @@ export class TransactionDS extends DataSource {
     this.dbClient = dbClient;
   }
 
-  public getTransactions(
-    fromDate: Maybe<Date>,
-    toDate: Maybe<Date>,
-    fromAmount: Maybe<number>,
-    toAmount: Maybe<number>,
-    reason: Maybe<number>,
-    offset: number,
-    limit: number
-  ): Promise<TransactionModel[]> {
-    const where: Prisma.TransactionWhereInput = {};
-    if (fromDate) {
-      where.date = <Prisma.DateTimeFilter>(where.date || {});
-      where.date.gte = fromDate;
-    }
-    if (toDate) {
-      where.date = <Prisma.DateTimeFilter>(where.date || {});
-      where.date.lte = toDate;
-    }
-
-    if (fromAmount) {
-      where.amount = <Prisma.DecimalFilter>(where.amount || {});
-      where.amount.gte = fromAmount;
-    }
-    if (toAmount) {
-      where.amount = <Prisma.DecimalFilter>(where.amount || {});
-      where.amount.lte = toAmount;
-    }
-
-    if (reason) {
-      where.reasonId = reason;
-    }
-
-    const query: Prisma.SelectSubset<
-      Prisma.TransactionFindManyArgs,
-      Prisma.TransactionFindManyArgs
-    > = {
-      skip: offset,
-      take: limit,
-      where,
-      orderBy: {
-        date: 'desc',
-      },
-      select: {
-        id: true,
-        amount: true,
-        date: true,
-        description: true,
-        updatedAt: true,
-        reasonId: true,
-      },
-    };
-
-    return this.dbClient.transaction.findMany(query);
-  }
-
-  public countTransactions(
-    fromDate: Maybe<Date>,
-    toDate: Maybe<Date>,
-    fromAmount: Maybe<number>,
-    toAmount: Maybe<number>,
-    reason: Maybe<number>
-  ): Promise<number> {
-    const where: Prisma.TransactionWhereInput = {};
-
-    if (fromDate) {
-      where.date = <Prisma.DateTimeFilter>(where.date || {});
-      where.date.gte = fromDate;
-    }
-    if (toDate) {
-      where.date = <Prisma.DateTimeFilter>(where.date || {});
-      where.date.lte = toDate;
-    }
-
-    if (fromAmount) {
-      where.amount = <Prisma.DecimalFilter>(where.amount || {});
-      where.amount.gte = fromAmount;
-    }
-    if (toAmount) {
-      where.amount = <Prisma.DecimalFilter>(where.amount || {});
-      where.amount.lte = toAmount;
-    }
-
-    if (reason) {
-      where.reasonId = reason;
-    }
-
-    return this.dbClient.transaction.count({ where });
-  }
-
-  public async getMonthGroups(
-    fromDate: Maybe<Date>,
-    toDate: Maybe<Date>,
-    fromAmount: Maybe<number>,
-    toAmount: Maybe<number>,
-    reason: Maybe<number>
-  ): Promise<{ month: Date; count: number }[]> {
-    const where: Prisma.TransactionWhereInput = {};
-
-    if (fromDate) {
-      where.date = <Prisma.DateTimeFilter>(where.date || {});
-      where.date.gte = fromDate;
-    }
-    if (toDate) {
-      where.date = <Prisma.DateTimeFilter>(where.date || {});
-      where.date.lte = toDate;
-    }
-
-    if (fromAmount) {
-      where.amount = <Prisma.DecimalFilter>(where.amount || {});
-      where.amount.gte = fromAmount;
-    }
-    if (toAmount) {
-      where.amount = <Prisma.DecimalFilter>(where.amount || {});
-      where.amount.lte = toAmount;
-    }
-
-    if (reason) {
-      where.reasonId = reason;
-    }
-
-    const result = await this.dbClient.transaction.groupBy({
-      by: ['month'],
-      where,
-      _count: {
-        id: true,
-      },
-      orderBy: {
-        month: 'desc',
+  public getTransactions(startIndex: number, stopIndex: number): Promise<TransactionModel[]> {
+    return this.dbClient.transaction.findMany({
+      where: {
+        id: {
+          gte: startIndex,
+          lte: stopIndex,
+        },
       },
     });
-
-    return result
-      .filter((r) => !!r.month)
-      .map((r) => ({ month: r.month as Date, count: r._count.id }));
   }
 
-  public getTransaction(id: number): Promise<TransactionModel | null> {
-    return this.dbClient.transaction.findUnique({
+  public async updateTransactionFilter(
+    dateFrom: Maybe<Date>,
+    dateTo: Maybe<Date>,
+    amountFrom: Maybe<number>,
+    amountTo: Maybe<number>,
+    groupBy?: GroupBy
+  ): Promise<{ orders: number[]; groups: GroupRow[] }> {
+    const where: Prisma.TransactionWhereInput = {};
+
+    if (dateFrom) {
+      where.date = <Prisma.DateTimeFilter>(where.date || {});
+      where.date.gte = dateFrom;
+    }
+    if (dateTo) {
+      where.date = <Prisma.DateTimeFilter>(where.date || {});
+      where.date.lte = dateTo;
+    }
+
+    if (amountFrom) {
+      where.amount = <Prisma.DecimalFilter>(where.amount || {});
+      where.amount.gte = amountFrom;
+    }
+    if (amountTo) {
+      where.amount = <Prisma.DecimalFilter>(where.amount || {});
+      where.amount.lte = amountTo;
+    }
+
+    if (groupBy === GroupBy.Month) {
+      const monthGroups = await this.dbClient.transaction.groupBy({
+        by: ['month'],
+        where,
+        _count: {
+          id: true,
+        },
+        _sum: {
+          amount: true,
+        },
+        orderBy: {
+          month: 'desc',
+        },
+      });
+
+      const ids = await this.dbClient.transaction.findMany({
+        where,
+        select: { id: true },
+        orderBy: {
+          date: 'desc',
+        },
+      });
+
+      const groups: GroupRow[] = [];
+      let offset = 0;
+      monthGroups.forEach((m) => {
+        const item = { month: m.month, offset, amount: m._sum.amount?.e || 0 };
+        offset += m._count.id;
+        groups.push(item);
+      });
+
+      return {
+        orders: ids.map((it) => it.id),
+        groups,
+      };
+    } else {
+      const reasonGroups = await this.dbClient.transaction.groupBy({
+        by: ['reasonId'],
+        where,
+        _count: {
+          id: true,
+        },
+        _sum: {
+          amount: true,
+        },
+        orderBy: {
+          reasonId: 'asc',
+        },
+      });
+
+      const ids = await this.dbClient.transaction.findMany({
+        where,
+        select: { id: true },
+        orderBy: {
+          reasonId: 'asc',
+        },
+      });
+
+      const groups: GroupRow[] = [];
+      let offset = 0;
+      reasonGroups.forEach((m) => {
+        const item = { reason: m.reasonId, offset, amount: m._sum.amount?.e || 0 };
+        offset += m._count.id;
+        groups.push(item);
+      });
+
+      return {
+        orders: ids.map((it) => it.id),
+        groups,
+      };
+    }
+  }
+
+  public getTransactionByIds(ids: number[]): Promise<TransactionModel[]> {
+    return this.dbClient.transaction.findMany({
       where: {
-        id,
-      },
-      select: {
-        id: true,
-        amount: true,
-        date: true,
-        description: true,
-        updatedAt: true,
-        reasonId: true,
-        month: true,
+        id: {
+          in: ids,
+        },
       },
     });
   }

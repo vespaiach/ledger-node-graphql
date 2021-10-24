@@ -7,11 +7,20 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum GroupBy {
+  Month
+  Reason
+
+  @@map("group_by")
+}
+
 model Reason {
   id           Int           @id @default(autoincrement())
   text         String        @unique @db.VarChar(255)
-  updatedAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now()) @map("updated_at")
   transactions Transaction[]
+
+  @@map("reasons")
 }
 
 model Transaction {
@@ -20,7 +29,9 @@ model Transaction {
   date        DateTime  @default(now())
   month       DateTime?
   description String?   @db.VarChar(511)
-  updatedAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @map("updated_at")
   reason      Reason    @relation(fields: [reasonId], references: [id])
-  reasonId    Int
+  reasonId    Int       @map("reason_id")
+
+  @@map("transactions")
 }
