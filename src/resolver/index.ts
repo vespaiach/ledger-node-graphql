@@ -38,44 +38,17 @@ export const resolvers: Resolvers = {
       return reasonDs.getReasons();
     },
 
-    transactions: (_, args, context) => {
-      const { dateFrom, dateTo, amountFrom, amountTo, reason, offset, limit } =
-        validateAndSanitize(args);
+    transactions: async (_, args, context) => {
+      const { startIndex, stopIndex } = args;
       const { transactionDs } = context.dataSources;
 
-      return transactionDs.getTransactions(
-        dateFrom,
-        dateTo,
-        amountFrom,
-        amountTo,
-        reason,
-        offset,
-        limit
-      );
+      return await transactionDs.getTransactions(startIndex, stopIndex);
     },
 
     transactionById: (_, args, context) => {
       const { id } = args;
       const { transactionDs } = context.dataSources;
       return transactionDs.getTransaction(id);
-    },
-
-    getPagingData: async (_, args, context) => {
-      const { dateFrom, dateTo, amountFrom, amountTo, reason } = validateAndSanitize(args);
-      const { transactionDs } = context.dataSources;
-
-      const months = await transactionDs.getMonthGroups(
-        dateFrom,
-        dateTo,
-        amountFrom,
-        amountTo,
-        reason
-      );
-
-      return {
-        totalRecords: months.reduce((a, m) => a + m.count, 0),
-        months,
-      };
     },
   },
 
@@ -129,16 +102,16 @@ export const resolvers: Resolvers = {
     filterTransaction: async (_, args, context) => {
       const { dateFrom, dateTo, amountFrom, amountTo, reason, groupBy } = validateAndSanitize(args);
       const { transactionDs } = context.dataSources;
-
       return {
-        totalRecords: await transactionDs.updateTransactionFilter(
+        ...(await transactionDs.updateTransactionFilter(
           dateFrom,
           dateTo,
           amountFrom,
           amountTo,
           reason,
           groupBy
-        ),
+        )),
+        groupBy,
       };
     },
   },

@@ -10,14 +10,14 @@
     "yarn": "1.x"
   },
   "dependencies": {
-    "@prisma/client": "3.2.1",
+    "@prisma/client": "^3.3.0",
     "apollo-datasource": "^3.1.0",
     "apollo-server": "^3.3.0",
     "faker": "^5.5.3",
     "graphql": "^15.5.2",
     "graphql-constraint-directive": "^2.1.1",
     "graphql-tools": "^8.2.0",
-    "prisma": "3.2.1",
+    "prisma": "^3.3.0",
     "ts-node": "^10.2.1",
     "tsconfig-paths": "^3.11.0",
     "typescript": "^4.4.2"
@@ -31,7 +31,8 @@
     "month:ts": "ts-node --project tsconfig.json ./src/util/saveMonth.ts",
     "seed": "node ./build/util/seed.js",
     "month": "node ./build/util/saveMonth.ts",
-    "start": "node ./build/index.js"
+    "start": "node ./build/index.js",
+    "migrate": "prisma migrate dev"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.1.1",

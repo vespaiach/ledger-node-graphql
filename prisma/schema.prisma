@@ -10,13 +10,17 @@ generator client {
 enum GroupBy {
   Month
   Reason
+
+  @@map("group_by")
 }
 
 model Reason {
   id           Int           @id @default(autoincrement())
   text         String        @unique @db.VarChar(255)
-  updatedAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now()) @map("updated_at")
   transactions Transaction[]
+
+  @@map("reasons")
 }
 
 model Transaction {
@@ -25,30 +29,35 @@ model Transaction {
   date         DateTime       @default(now())
   month        DateTime?
   description  String?        @db.VarChar(511)
-  updatedAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now()) @map("updated_at")
   reason       Reason         @relation(fields: [reasonId], references: [id])
-  reasonId     Int
+  reasonId     Int            @map("reason_id")
   FilterResult FilterResult[]
+
+  @@map("transactions")
 }
 
 model FilterInput {
   id           Int            @id @default(autoincrement())
-  amountFrom   Decimal?       @db.Decimal(15, 2)
-  amountTo     Decimal?       @db.Decimal(15, 2)
-  dateFrom     DateTime?
-  dateTo       DateTime?
-  reasonId     Int?
-  groupBy      GroupBy?       @default(Month)
+  amountFrom   Decimal?       @map("amount_from") @db.Decimal(15, 2)
+  amountTo     Decimal?       @map("amount_to") @db.Decimal(15, 2)
+  dateFrom     DateTime?      @map("date_from")
+  dateTo       DateTime?      @map("date_to")
+  reasonId     Int?           @map("reason_id")
+  groupBy      GroupBy?       @default(Month) @map("group_by")
   active       Boolean        @default(false)
   FilterResult FilterResult[]
+
+  @@map("filter_inputs")
 }
 
 model FilterResult {
   id            Int          @id @default(autoincrement())
-  filterInput   FilterInput  @relation(fields: [filterInputId], references: [id])
-  filterInputId Int
-  index         Int
-  groupBy       Json?
-  transaction   Transaction? @relation(fields: [transactionId], references: [id])
-  transactionId Int
+  filterInput   FilterInput  @relation(fields: [filterInputId], references: [id], onDelete: Cascade)
+  filterInputId Int          @map("filter_input_id")
+  groupBy       Json?        @map("group_by")
+  transaction   Transaction? @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  transactionId Int          @map("transaction_id")
+
+  @@map("filter_results")
 }

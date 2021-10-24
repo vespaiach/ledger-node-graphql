@@ -37,13 +37,22 @@ input TransactionInput {
   reason: String
 }
 
+type Aggregation {
+  reason: String
+  month: Date
+  amount: Float!
+  offset: Int!
+}
+
 type Pagination {
   totalRecords: Int!
+  groupBy: GroupBy!
+  groups: [Aggregation]! 
 }
 
 type Query {
   reasons: [Reason]!
-  transactions(startIndex: Int!, endIndex: Int): [Transaction]!
+  transactions(startIndex: Int!, stopIndex: Int!): [Transaction]!
   transactionById(id: Int!): Transaction
 }
 

@@ -12,4 +12,3 @@ export interface CustomContext {
 
 export type ReasonModel = Reason;
 export type TransactionModel = Transaction;
-export type TransactionModel = Transaction;
