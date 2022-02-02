@@ -14,13 +14,18 @@
     "importHelpers": true,
     "noEmitHelpers": true,
     "module": "CommonJS",
-    "target": "ES2019",
+    "target": "ESNext",
     "resolveJsonModule": true,
-    "baseUrl": ".",
     "skipLibCheck": true,
     "outDir": "./build",
+    "baseUrl": "./",
     "paths": {
-      "src/*": ["src/*"]
+      "@resolver/*": ["src/resolver/*"],
+      "@datasource/*": ["src/datasource/*"],
+      "@resolver": ["src/resolver"],
+      "@schema/*": ["src/schema/*"],
+      "@db": ["src/db"],
+      "@db/*": ["src/db/*"]
     }
   },
   "include": ["src", "src/global.d.ts"],

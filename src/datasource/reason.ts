@@ -1,12 +1,17 @@
 import { DataSource } from 'apollo-datasource';
-
 import { PrismaClient } from '@prisma/client';
-import { ReasonModel } from 'src/schema/types';
+
+import { ReasonModel } from '@schema/types';
+import {
+  MutationCreateReasonArgs,
+  MutationDeleteReasonArgs,
+  MutationUpdateReasonArgs,
+} from '@schema/types.generated';
 
 export class ReasonDS extends DataSource {
-  private dbClient: PrismaClient;
+  dbClient: PrismaClient;
 
-  constructor({ dbClient }: { dbClient: PrismaClient }) {
+  constructor(dbClient: PrismaClient) {
     super();
     this.dbClient = dbClient;
   }
@@ -15,7 +20,7 @@ export class ReasonDS extends DataSource {
     return this.dbClient.reason.findMany({
       orderBy: [
         {
-          updatedAt: 'desc',
+          text: 'asc',
         },
       ],
       select: {
@@ -26,6 +31,9 @@ export class ReasonDS extends DataSource {
     });
   }
 
+  /**
+   * Prisma return null if it can't find the record.
+   */
   public getReasonById(id: number): Promise<ReasonModel | null> {
     return this.dbClient.reason.findUnique({
       where: {
@@ -52,16 +60,31 @@ export class ReasonDS extends DataSource {
     });
   }
 
-  public addReason(text: string): Promise<ReasonModel> {
+  public createReason(args: MutationCreateReasonArgs): Promise<ReasonModel> {
     return this.dbClient.reason.create({
-      select: {
-        id: true,
-        text: true,
-        updatedAt: true,
-      },
       data: {
-        text,
+        text: args.text,
         updatedAt: new Date(),
+      },
+    });
+  }
+
+  public updateReason(args: MutationUpdateReasonArgs): Promise<ReasonModel> {
+    return this.dbClient.reason.update({
+      data: {
+        text: args.text ? args.text : undefined,
+        updatedAt: new Date(),
+      },
+      where: {
+        id: args.id,
+      },
+    });
+  }
+
+  public async deleteReason(args: MutationDeleteReasonArgs): Promise<void> {
+    await this.dbClient.reason.delete({
+      where: {
+        id: args.id,
       },
     });
   }

@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient, Transaction } from '@prisma/client';
-import faker from 'faker';
+import faker from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
@@ -58,16 +58,15 @@ async function createTransactions(reasons: { id: number }[], factor: number, loo
   const transactions: Omit<Transaction, 'id'>[] = [];
 
   for (let i = 0; i < loop; i++) {
-    const date = faker.date.between(fromDate, toDate);
+    const date = faker.date.between(fromDate.toISOString(), toDate.toISOString());
     const reasonInd = faker.datatype.number({ min: 0, max: reasons.length - 1 });
 
     transactions.push({
       amount: new Prisma.Decimal(factor * parseFloat(faker.finance.amount(1, 1000, 2))),
       date,
-      description: faker.lorem.sentence(),
+      note: faker.lorem.sentence(),
       reasonId: reasons[reasonInd].id,
       updatedAt: date,
-      month: new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0),
     });
   }
 

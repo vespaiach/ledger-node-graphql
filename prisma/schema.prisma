@@ -24,14 +24,13 @@ model Reason {
 }
 
 model Transaction {
-  id          Int       @id @default(autoincrement())
-  amount      Decimal   @db.Decimal(15, 2)
-  date        DateTime  @default(now())
-  month       DateTime?
-  description String?   @db.VarChar(511)
-  updatedAt   DateTime  @default(now()) @map("updated_at")
-  reason      Reason    @relation(fields: [reasonId], references: [id])
-  reasonId    Int       @map("reason_id")
+  id        Int      @id @default(autoincrement())
+  amount    Decimal  @db.Decimal(15, 2)
+  date      DateTime @default(now())
+  note      String?  @db.VarChar(511)
+  updatedAt DateTime @default(now()) @map("updated_at")
+  reason    Reason   @relation(fields: [reasonId], references: [id], onDelete: Cascade)
+  reasonId  Int      @map("reason_id")
 
   @@map("transactions")
 }

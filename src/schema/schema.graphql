@@ -1,15 +1,15 @@
 scalar Date
 
-enum GroupBy {
-  Month
-  Reason
+enum TransactionType {
+  Income
+  Expense
 }
 
 type Transaction {
   id: Int!
   amount: Float!
   date: Date!
-  description: String
+  note: String
   updatedAt: Date!
   reason: Reason!
 }
@@ -20,42 +20,26 @@ type Reason {
   updatedAt: Date!
 }
 
-input TransactionFilterInput {
-  amountFrom: Float
-  amountTo: Float
-  dateFrom: String @constraint(format: "date")
-  dateTo: String @constraint(format: "date")
-  groupBy: GroupBy
-}
-
-input TransactionInput {
-  id: Int
-  amount: Float
-  date: String @constraint(format: "date")
-  description: String
-  reason: String
-}
-
-type Aggregation {
-  reason: Int
-  month: Date
-  amount: Float!
-  offset: Int!
-}
-
-type Pagination {
-  orders: [Int]!
-  groups: [Aggregation]!
-}
-
 type Query {
-  reasons: [Reason]!
-  transactions(startIndex: Int!, stopIndex: Int!): [Transaction]!
-  transactionByIds(ids: [Int!]!): [Transaction]!
-  filterTransaction(input: TransactionFilterInput): Pagination!
+  getReasons: [Reason]!
+  getTransactions(
+    fromDate: Date
+    toDate: Date
+    fromAmount: Int
+    toAmount: Int
+    reasonId: Int
+    transactionType: TransactionType
+    lastCursor: Int
+    take: Int = 50
+  ): [Transaction]!
 }
 
 type Mutation {
-  mutateTransaction(input: TransactionInput!): Transaction
+  createReason(text: String!): Reason
+  updateReason(id: Int!, text: String!): Reason
+  deleteReason(id: Int!): Boolean
+
+  createTransaction(date: Date!, amount: Float!, reasonId: Int!, note: String): Transaction
+  updateTransaction(id: Int!, date: Date, amount: Float, reasonId: Int, note: String): Transaction
   deleteTransaction(id: Int!): Boolean
 }
