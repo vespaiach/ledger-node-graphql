@@ -15,8 +15,7 @@ CREATE TABLE "transactions" (
     "id" SERIAL NOT NULL,
     "amount" DECIMAL(15,2) NOT NULL,
     "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "month" TIMESTAMP(3),
-    "description" VARCHAR(511),
+    "note" VARCHAR(511),
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "reason_id" INTEGER NOT NULL,
 
