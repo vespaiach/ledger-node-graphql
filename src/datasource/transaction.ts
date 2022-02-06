@@ -20,6 +20,13 @@ export class TransactionDS extends DataSource {
 
   public getTransactions(args: QueryGetTransactionsArgs): Promise<TransactionModel[]> {
     const take = args.take ?? 50;
+
+    const gteAmount =
+      args.transactionType === TransactionType.Income ? 0 : args.fromAmount || undefined;
+
+    const lteAmount =
+      args.transactionType === TransactionType.Expense ? 0 : args.toAmount || undefined;
+
     return this.dbClient.transaction.findMany({
       take,
       skip: 1,
@@ -38,20 +45,10 @@ export class TransactionDS extends DataSource {
             : undefined,
 
         amount:
-          args.fromAmount || args.toAmount
+          gteAmount || lteAmount
             ? {
-                gte:
-                  args.transactionType === TransactionType.Income
-                    ? 0
-                    : args.fromAmount
-                    ? args.fromAmount
-                    : undefined,
-                lte:
-                  args.transactionType === TransactionType.Income
-                    ? 0
-                    : args.toAmount
-                    ? args.toAmount
-                    : undefined,
+                gte: gteAmount,
+                lte: lteAmount,
               }
             : undefined,
 

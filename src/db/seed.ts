@@ -46,8 +46,8 @@ async function main() {
   });
 
   await Promise.all([
-    createTransactions(payReasonIds, -1, 1000),
-    createTransactions(incomeReasonIds, 1, 800),
+    createTransactions(payReasonIds, -1, 10000),
+    createTransactions(incomeReasonIds, 1, 8000),
   ]);
 }
 
