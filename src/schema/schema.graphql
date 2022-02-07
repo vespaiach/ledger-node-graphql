@@ -21,7 +21,7 @@ type Reason {
 }
 
 type Query {
-  getReasons: [Reason]!
+  getReasons: [Reason!]
   getTransactions(
     fromDate: Date
     toDate: Date
@@ -31,7 +31,7 @@ type Query {
     transactionType: TransactionType
     lastCursor: Int
     take: Int = 50
-  ): [Transaction]!
+  ): [Transaction!]
 }
 
 type Mutation {
