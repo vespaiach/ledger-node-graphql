@@ -24,38 +24,41 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    env:
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
 
     steps:
 
-    - name: Stop web server 
-      uses: JimCronqvist/action-ssh@master
-      with:
-        hosts: ${{ secrets.SERVER_HOST }}
-        privateKey: ${{ secrets.PRIVATE_KEY }}
-        debug: ${{ secrets.DEBUG }}
-        command: stop.sh 
-    - name: Copy build to server 
-      uses: garygrossgarten/github-action-scp@release
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        local: build
-        remote: ledger-graphql
-        verbose: ${{ secrets.DEBUG }}
-        privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
-    - name: Copy package.json to server 
-      uses: garygrossgarten/github-action-scp@release
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        local: package.json
-        remote: ledger-graphql
-        verbose: ${{ secrets.DEBUG }}
-        privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
-    - name: Install dependencies and start web server
-      uses: JimCronqvist/action-ssh@master
-      with:
-        hosts: ${{ secrets.SERVER_HOST }}
-        privateKey: ${{ secrets.PRIVATE_KEY }}
-        debug: ${{ secrets.DEBUG }}
-        command: |
-          npm ci
-          start.sh 
+    - name: Config SSH
+      run: |
+        mkdir -p ~/.ssh/
+        echo "$SSH_KEY" > ~/.ssh/remote.key
+        chmod 600 ~/.ssh/remote.key
+        cat >>~/.ssh/config <<END
+        Host remote
+          HostName $SSH_HOST
+          User $SSH_USER
+          IdentityFile ~/.ssh/remote.key
+          StrictHostKeyChecking no
+        END
+      env:
+        SSH_KEY: ${{ secrets.SSH_KEY }}
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+
+    - name: Stop web server
+      run: ssh remote 'pm2 stop --name ledger-graphql'
+
+    - name: Copy build 
+      run: rsync -r build remote:/home/$SSH_USER/ledger-graphql
+
+    - name: Copy package.json 
+      run: rsync package.json remote:/home/$SSH_USER/ledger-graphql
+
+    - name: Install dependencies 
+      run: ssh remote 'npm ci'
+
+    - name: Start web server 
+      run: ssh remote 'pm2 start /home/$SSH_USER/ledger-graphql/build/index.js --name ledger-graphql'
+    
