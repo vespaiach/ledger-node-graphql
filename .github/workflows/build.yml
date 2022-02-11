@@ -48,7 +48,7 @@ jobs:
         SSH_HOST: ${{ secrets.SSH_HOST }}
 
     - name: Stop web server
-      run: ssh remote 'pm2 stop --name ledger-graphql'
+      run: ssh remote 'pm2 stop ledger-graphql'
 
     - name: Copy build 
       run: rsync -r build remote:/home/$SSH_USER/ledger-graphql
