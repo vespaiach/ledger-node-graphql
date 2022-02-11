@@ -47,18 +47,12 @@ jobs:
         SSH_KEY: ${{ secrets.SSH_KEY }}
         SSH_HOST: ${{ secrets.SSH_HOST }}
 
-    - name: Stop web server
-      run: ssh remote 'pm2 stop ledger-graphql'
-
     - name: Copy build 
       run: rsync -r build remote:/home/$SSH_USER/ledger-graphql
 
     - name: Copy package.json 
       run: rsync package.json remote:/home/$SSH_USER/ledger-graphql
 
-    - name: Install dependencies 
-      run: ssh remote 'npm ci'
-
     - name: Start web server 
-      run: ssh remote 'pm2 start /home/$SSH_USER/ledger-graphql/build/index.js --name ledger-graphql'
+      run: ssh remote 'start.sh'
     
