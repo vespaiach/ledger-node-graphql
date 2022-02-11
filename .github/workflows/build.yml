@@ -1,34 +1,13 @@
-name: Build CI
+name: Trigger CD/CI
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-
-    - uses: actions/checkout@v2
-    - name: Use Node.js 16
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build
-
   
-  deploy:
-    needs: build
+  build:
     runs-on: ubuntu-latest
-    env:
-      SSH_USER: ${{ secrets.SSH_USER }}
-      SSH_KEY: ${{ secrets.SSH_KEY }}
-      SSH_HOST: ${{ secrets.SSH_HOST }}
-
     steps:
 
     - name: Config SSH
@@ -47,13 +26,8 @@ jobs:
       env:
         SSH_KEY: ${{ secrets.SSH_KEY }}
         SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
 
-    - name: Copy build 
-      run: rsync -r build remote:/home/$SSH_USER/ledger-graphql
-
-    - name: Copy package.json 
-      run: rsync package.json remote:/home/$SSH_USER/ledger-graphql
-
-    - name: Start web server 
-      run: ssh remote 'start.sh'
+    - name: Trigger build process 
+      run: ssh remote 'ledger-graphql.sh'
     
