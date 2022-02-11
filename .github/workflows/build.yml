@@ -42,6 +42,7 @@ jobs:
           User $SSH_USER
           IdentityFile ~/.ssh/remote.key
           StrictHostKeyChecking no
+          UserKnownHostsFile /dev/null
         END
       env:
         SSH_KEY: ${{ secrets.SSH_KEY }}
