@@ -32,6 +32,7 @@ jobs:
       with:
         hosts: ${{ secrets.SERVER_HOST }}
         privateKey: ${{ secrets.PRIVATE_KEY }}
+        debug: ${{ secrets.DEBUG }}
         command: stop.sh 
     - name: Copy build to server 
       uses: garygrossgarten/github-action-scp@release
@@ -39,6 +40,7 @@ jobs:
         host: ${{ secrets.SERVER_HOST }}
         local: build
         remote: ledger-graphql
+        verbose: ${{ secrets.DEBUG }}
         privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
     - name: Copy package.json to server 
       uses: garygrossgarten/github-action-scp@release
@@ -46,10 +48,14 @@ jobs:
         host: ${{ secrets.SERVER_HOST }}
         local: package.json
         remote: ledger-graphql
+        verbose: ${{ secrets.DEBUG }}
         privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
     - name: Install dependencies and start web server
       uses: JimCronqvist/action-ssh@master
       with:
         hosts: ${{ secrets.SERVER_HOST }}
         privateKey: ${{ secrets.PRIVATE_KEY }}
-        command: npm ci && start.sh 
+        debug: ${{ secrets.DEBUG }}
+        command: |
+          npm ci
+          start.sh 
