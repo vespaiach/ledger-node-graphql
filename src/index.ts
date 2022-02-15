@@ -1,7 +1,8 @@
 import { ApolloServer } from 'apollo-server-express';
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
 import express from 'express';
-import http from 'http';
+import https from 'https';
+import fs from 'fs';
 
 import { typeDefs } from '@schema/definition';
 import { ReasonDS } from '@datasource/reason';
@@ -9,10 +10,20 @@ import { resolvers } from '@resolver';
 import { dbClient } from '@db';
 import { TransactionDS } from '@datasource/transaction';
 
+const port = process.env.LEDGER_PORT || 3333;
+const key = process.env.LEDGER_KEY || 'dev.key';
+const cert = process.env.LEDGER_CERT || 'dev.crt';
+
 (async function startServer() {
   const app = express();
 
-  const httpServer = http.createServer(app);
+  const httpServer = https.createServer(
+    {
+      key: fs.readFileSync(key),
+      cert: fs.readFileSync(cert),
+    },
+    app
+  );
 
   const server = new ApolloServer({
     typeDefs,
@@ -28,8 +39,6 @@ import { TransactionDS } from '@datasource/transaction';
 
   server.applyMiddleware({ app });
 
-  const port = process.env.PORT || 3000;
-
   await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
-  console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`);
+  console.log(`🚀 Server ready at https://localhost:${port}${server.graphqlPath}`);
 })();
