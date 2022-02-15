@@ -46,15 +46,23 @@ async function main() {
   });
 
   await Promise.all([
-    createTransactions(payReasonIds, -1, 10000),
-    createTransactions(incomeReasonIds, 1, 8000),
+    createTransactions(payReasonIds, -1, 1000),
+    createTransactions(incomeReasonIds, 1, 1000),
+    createTransactions(payReasonIds, -1, 1000),
+    createTransactions(incomeReasonIds, 1, 1000),
+    createTransactions(payReasonIds, -1, 1000),
+    createTransactions(incomeReasonIds, 1, 1000),
+    createTransactions(payReasonIds, -1, 1000),
+    createTransactions(incomeReasonIds, 1, 1000),
+    createTransactions(payReasonIds, -1, 1000),
+    createTransactions(incomeReasonIds, 1, 1000),
   ]);
 }
 
 async function createTransactions(reasons: { id: number }[], factor: number, loop: number) {
   const fromDate = new Date();
   const toDate = new Date(fromDate);
-  toDate.setMonth(-24);
+  fromDate.setMonth(-36);
   const transactions: Omit<Transaction, 'id'>[] = [];
 
   for (let i = 0; i < loop; i++) {

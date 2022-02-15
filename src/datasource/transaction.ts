@@ -7,7 +7,6 @@ import {
   MutationDeleteTransactionArgs,
   MutationUpdateTransactionArgs,
   QueryGetTransactionsArgs,
-  TransactionType,
 } from '@schema/types.generated';
 
 export class TransactionDS extends DataSource {
@@ -21,11 +20,9 @@ export class TransactionDS extends DataSource {
   public getTransactions(args: QueryGetTransactionsArgs): Promise<TransactionModel[]> {
     const take = args.take ?? 50;
 
-    const gteAmount =
-      args.transactionType === TransactionType.Income ? 0 : args.fromAmount || undefined;
+    const gteAmount = args.fromAmount || undefined;
 
-    const lteAmount =
-      args.transactionType === TransactionType.Expense ? 0 : args.toAmount || undefined;
+    const lteAmount = args.toAmount || undefined;
 
     return this.dbClient.transaction.findMany({
       take,

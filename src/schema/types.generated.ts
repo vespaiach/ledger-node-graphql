@@ -79,7 +79,6 @@ export type QueryGetTransactionsArgs = {
   take?: InputMaybe<Scalars['Int']>;
   toAmount?: InputMaybe<Scalars['Int']>;
   toDate?: InputMaybe<Scalars['Date']>;
-  transactionType?: InputMaybe<TransactionType>;
 };
 
 export type Reason = {
@@ -98,11 +97,6 @@ export type Transaction = {
   reason: Reason;
   updatedAt: Scalars['Date'];
 };
-
-export enum TransactionType {
-  Expense = 'Expense',
-  Income = 'Income'
-}
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
 export type ResolversObject<TObject> = WithIndex<TObject>;
@@ -183,7 +177,6 @@ export type ResolversTypes = ResolversObject<{
   Reason: ResolverTypeWrapper<ReasonModel>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Transaction: ResolverTypeWrapper<TransactionModel>;
-  TransactionType: TransactionType;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
