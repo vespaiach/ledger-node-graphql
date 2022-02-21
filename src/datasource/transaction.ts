@@ -6,6 +6,7 @@ import {
   MutationCreateTransactionArgs,
   MutationDeleteTransactionArgs,
   MutationUpdateTransactionArgs,
+  QueryGetTransactionArgs,
   QueryGetTransactionsArgs,
 } from '@schema/types.generated';
 
@@ -51,6 +52,12 @@ export class TransactionDS extends DataSource {
 
         reasonId: args.reasonId ? args.reasonId : undefined,
       },
+    });
+  }
+
+  public getTransaction(args: QueryGetTransactionArgs): Promise<TransactionModel | null> {
+    return this.dbClient.transaction.findUnique({
+      where: { id: args.id },
     });
   }
 

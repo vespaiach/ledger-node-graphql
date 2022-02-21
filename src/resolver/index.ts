@@ -9,6 +9,11 @@ export const resolvers: Resolvers = {
       return reasonDs.getReasons();
     },
 
+    getTransaction: (_, args, context) => {
+      const { transactionDs } = context.dataSources;
+      return transactionDs.getTransaction(args);
+    },
+
     getTransactions: (_, args, context) => {
       const { transactionDs } = context.dataSources;
       return transactionDs.getTransactions(args);

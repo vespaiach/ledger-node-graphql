@@ -17,6 +17,7 @@ type Reason {
 
 type Query {
   getReasons: [Reason!]
+  getTransaction(id: Int!): Transaction
   getTransactions(
     fromDate: Date
     toDate: Date

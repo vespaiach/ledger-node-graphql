@@ -67,7 +67,13 @@ export type MutationUpdateTransactionArgs = {
 export type Query = {
   __typename?: 'Query';
   getReasons?: Maybe<Array<Reason>>;
+  getTransaction?: Maybe<Transaction>;
   getTransactions?: Maybe<Array<Transaction>>;
+};
+
+
+export type QueryGetTransactionArgs = {
+  id: Scalars['Int'];
 };
 
 
@@ -207,6 +213,7 @@ export type MutationResolvers<ContextType = CustomContext, ParentType extends Re
 
 export type QueryResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   getReasons?: Resolver<Maybe<Array<ResolversTypes['Reason']>>, ParentType, ContextType>;
+  getTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<QueryGetTransactionArgs, 'id'>>;
   getTransactions?: Resolver<Maybe<Array<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryGetTransactionsArgs, 'take'>>;
 }>;
 
