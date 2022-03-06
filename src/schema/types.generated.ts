@@ -81,7 +81,7 @@ export type QueryGetTransactionsArgs = {
   fromAmount?: InputMaybe<Scalars['Int']>;
   fromDate?: InputMaybe<Scalars['Date']>;
   lastCursor?: InputMaybe<Scalars['Int']>;
-  reasonId?: InputMaybe<Scalars['Int']>;
+  reasonIds?: InputMaybe<Array<Scalars['Int']>>;
   take?: InputMaybe<Scalars['Int']>;
   toAmount?: InputMaybe<Scalars['Int']>;
   toDate?: InputMaybe<Scalars['Date']>;

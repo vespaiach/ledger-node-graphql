@@ -23,7 +23,7 @@ type Query {
     toDate: Date
     fromAmount: Int
     toAmount: Int
-    reasonId: Int
+    reasonIds: [Int!]
     lastCursor: Int
     take: Int = 50
   ): [Transaction!]

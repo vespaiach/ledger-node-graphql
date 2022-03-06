@@ -48,5 +48,7 @@ const isProduction = process.env.NODE_ENV === 'production';
   server.applyMiddleware({ app });
 
   await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
-  console.log(`🚀 Server ready at https://localhost:${port}${server.graphqlPath}`);
+  console.log(
+    `🚀 Server ready at http${isProduction ? 's' : ''}://localhost:${port}${server.graphqlPath}`
+  );
 })();

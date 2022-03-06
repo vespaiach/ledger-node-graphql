@@ -50,7 +50,12 @@ export class TransactionDS extends DataSource {
               }
             : undefined,
 
-        reasonId: args.reasonId ? args.reasonId : undefined,
+        reasonId:
+          args.reasonIds && args.reasonIds.length > 0
+            ? {
+                in: args.reasonIds,
+              }
+            : undefined,
       },
     });
   }
