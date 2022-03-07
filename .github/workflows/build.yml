@@ -29,5 +29,5 @@ jobs:
         SSH_USER: ${{ secrets.SSH_USER }}
 
     - name: Trigger build process 
-      run: ssh remote 'ledger-graphql.sh'
+      run: ssh remote 'ledger-graphql'
     
