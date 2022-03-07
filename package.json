@@ -23,6 +23,7 @@
   "scripts": {
     "dev": "DEBUG=express:* ts-node -r tsconfig-paths/register ./src/index.ts",
     "build": "tsc -p . && tscpaths -p tsconfig.json -s ./src -o ./build",
+    "postbuild": "cp ./src/schema/schema.graphql ./build/schema/schema.graphql",
     "gentype": "graphql-codegen --config codegen.yml",
     "seed": "ts-node ./src/db/seed.ts",
     "start": "node ./build/index.js",
