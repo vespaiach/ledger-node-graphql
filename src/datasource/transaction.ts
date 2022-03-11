@@ -26,6 +26,9 @@ export class TransactionDS extends DataSource {
     const lteAmount = args.toAmount || undefined;
 
     return this.dbClient.transaction.findMany({
+      orderBy: {
+        date: 'desc',
+      },
       take,
       skip: 1,
       cursor: args.lastCursor
