@@ -36,7 +36,7 @@ export type MutationCreateTransactionArgs = {
   amount: Scalars['Float'];
   date: Scalars['Date'];
   note?: InputMaybe<Scalars['String']>;
-  reasonId: Scalars['Int'];
+  reasonText: Scalars['String'];
 };
 
 
@@ -61,7 +61,7 @@ export type MutationUpdateTransactionArgs = {
   date?: InputMaybe<Scalars['Date']>;
   id: Scalars['Int'];
   note?: InputMaybe<Scalars['String']>;
-  reasonId?: InputMaybe<Scalars['Int']>;
+  reasonText?: InputMaybe<Scalars['String']>;
 };
 
 export type Query = {
@@ -204,7 +204,7 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 
 export type MutationResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createReason?: Resolver<Maybe<ResolversTypes['Reason']>, ParentType, ContextType, RequireFields<MutationCreateReasonArgs, 'text'>>;
-  createTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<MutationCreateTransactionArgs, 'amount' | 'date' | 'reasonId'>>;
+  createTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<MutationCreateTransactionArgs, 'amount' | 'date' | 'reasonText'>>;
   deleteReason?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteReasonArgs, 'id'>>;
   deleteTransaction?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTransactionArgs, 'id'>>;
   updateReason?: Resolver<Maybe<ResolversTypes['Reason']>, ParentType, ContextType, RequireFields<MutationUpdateReasonArgs, 'id' | 'text'>>;

@@ -1,4 +1,4 @@
-const typeDefs = `
+const typeDefs = /* GraphQL */`
   scalar Date
 
   type Transaction {
@@ -35,8 +35,8 @@ const typeDefs = `
     updateReason(id: Int!, text: String!): Reason
     deleteReason(id: Int!): Boolean
 
-    createTransaction(date: Date!, amount: Float!, reasonId: Int!, note: String): Transaction
-    updateTransaction(id: Int!, date: Date, amount: Float, reasonId: Int, note: String): Transaction
+    createTransaction(date: Date!, amount: Float!, reasonText: String!, note: String): Transaction
+    updateTransaction(id: Int!, date: Date, amount: Float, reasonText: String, note: String): Transaction
     deleteTransaction(id: Int!): Boolean
   }
 

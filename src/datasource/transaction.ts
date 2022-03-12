@@ -69,7 +69,9 @@ export class TransactionDS extends DataSource {
     });
   }
 
-  public createTransaction(args: MutationCreateTransactionArgs): Promise<TransactionModel> {
+  public createTransaction(
+    args: Omit<MutationCreateTransactionArgs, 'reasonText'> & { reasonId: number }
+  ): Promise<TransactionModel> {
     return this.dbClient.transaction.create({
       include: { reason: true },
       data: {
@@ -82,7 +84,9 @@ export class TransactionDS extends DataSource {
     });
   }
 
-  public updateTransaction(args: MutationUpdateTransactionArgs): Promise<TransactionModel> {
+  public updateTransaction(
+    args: Omit<MutationUpdateTransactionArgs, 'reasonText'> & { reasonId?: number | undefined }
+  ): Promise<TransactionModel> {
     return this.dbClient.transaction.update({
       include: { reason: true },
       data: {

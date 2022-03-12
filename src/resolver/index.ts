@@ -1,4 +1,4 @@
-import { ApolloError, UserInputError } from 'apollo-server-errors';
+import { ApolloError } from 'apollo-server-errors';
 
 import { Resolvers } from '@schema/types.generated';
 
@@ -40,23 +40,30 @@ export const resolvers: Resolvers = {
     createTransaction: async (_, args, context) => {
       const { reasonDs, transactionDs } = context.dataSources;
 
-      const reason = await reasonDs.getReasonById(args.reasonId);
+      let reason = await reasonDs.getReasonByText(args.reasonText);
 
-      if (!reason) throw new UserInputError(`Reason with id = ${args.reasonId} doesn't exist.`);
+      if (!reason) {
+        reason = await reasonDs.createReason({ text: args.reasonText });
+      }
 
-      return transactionDs.createTransaction(args);
+      return transactionDs.createTransaction({ ...args, reasonId: reason.id });
     },
 
     updateTransaction: async (_, args, context) => {
       const { reasonDs, transactionDs } = context.dataSources;
 
-      const reason = args.reasonId ? await reasonDs.getReasonById(args.reasonId) : undefined;
+      let reasonId: number | undefined = undefined;
+      if (args.reasonText) {
+        let reason = await reasonDs.getReasonByText(args.reasonText);
 
-      if (reason === null) {
-        throw new UserInputError(`Reason with id = ${args.reasonId} doesn't exist.`);
+        if (!reason) {
+          reason = await reasonDs.createReason({ text: args.reasonText });
+        }
+
+        reasonId = reason.id;
       }
 
-      return transactionDs.updateTransaction(args);
+      return transactionDs.updateTransaction({ ...args, reasonId });
     },
 
     deleteTransaction: async (_, args, context) => {

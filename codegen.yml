@@ -1,4 +1,4 @@
-schema: "src/schema/schema.graphql"
+schema: "src/schema/definition.ts"
 documents: null
 generates:
   src/schema/types.generated.ts:
