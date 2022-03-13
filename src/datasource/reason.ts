@@ -1,9 +1,10 @@
 import { DataSource } from 'apollo-datasource';
 import { PrismaClient } from '@prisma/client';
 
-import { ReasonModel } from '@schema/types';
+import { ReasonModel, TransactionModel } from '@schema/types';
 import {
   MutationCreateReasonArgs,
+  MutationCreateTransactionArgs,
   MutationDeleteReasonArgs,
   MutationUpdateReasonArgs,
 } from '@schema/types.generated';
@@ -60,17 +61,29 @@ export class ReasonDS extends DataSource {
     });
   }
 
-  public createReason(args: MutationCreateReasonArgs): Promise<ReasonModel> {
+  public createReason(
+    args: MutationCreateReasonArgs,
+    transactions?: Omit<MutationCreateTransactionArgs, 'reasonText'>[]
+  ): Promise<ReasonModel & { transactions?: TransactionModel[] }> {
     return this.dbClient.reason.create({
+      include: { transactions: true },
       data: {
         text: args.text,
         updatedAt: new Date(),
+        transactions: transactions?.length
+          ? {
+              create: transactions,
+            }
+          : undefined,
       },
     });
   }
 
   public updateReason(args: MutationUpdateReasonArgs): Promise<ReasonModel> {
     return this.dbClient.reason.update({
+      include: {
+        transactions: true,
+      },
       data: {
         text: args.text ? args.text : undefined,
         updatedAt: new Date(),

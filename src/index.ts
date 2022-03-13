@@ -10,6 +10,7 @@ import { ReasonDS } from '@datasource/reason';
 import { resolvers } from '@resolver';
 import { dbClient } from '@db';
 import { TransactionDS } from '@datasource/transaction';
+import { DailySpendDS } from '@datasource/dailySpend';
 
 const port = process.env.LEDGER_PORT || 3333;
 const key = process.env.LEDGER_KEY || 'dev.key';
@@ -40,6 +41,7 @@ const isProduction = process.env.NODE_ENV === 'production';
     dataSources: () => ({
       reasonDs: new ReasonDS(dbClient),
       transactionDs: new TransactionDS(dbClient),
+      dailySpendDs: new DailySpendDS(dbClient),
     }),
   });
 

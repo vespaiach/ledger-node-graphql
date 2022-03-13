@@ -1,5 +1,5 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { ReasonModel, TransactionModel, CustomContext } from './types';
+import { ReasonModel, TransactionModel, DailyBalanceModel, CustomContext } from './types';
 export type Maybe<T> = T | null | undefined;
 export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -14,6 +14,13 @@ export type Scalars = {
   Int: number;
   Float: number;
   Date: Date;
+};
+
+export type DailyBalance = {
+  __typename?: 'DailyBalance';
+  date: Scalars['String'];
+  earning: Scalars['Float'];
+  spending: Scalars['Float'];
 };
 
 export type Mutation = {
@@ -66,6 +73,7 @@ export type MutationUpdateTransactionArgs = {
 
 export type Query = {
   __typename?: 'Query';
+  getDailyBalance: Array<DailyBalance>;
   getReasons?: Maybe<Array<Reason>>;
   getTransaction?: Maybe<Transaction>;
   getTransactions?: Maybe<Array<Transaction>>;
@@ -175,6 +183,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  DailyBalance: ResolverTypeWrapper<DailyBalanceModel>;
   Date: ResolverTypeWrapper<Scalars['Date']>;
   Float: ResolverTypeWrapper<Scalars['Float']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
@@ -188,6 +197,7 @@ export type ResolversTypes = ResolversObject<{
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean'];
+  DailyBalance: DailyBalanceModel;
   Date: Scalars['Date'];
   Float: Scalars['Float'];
   Int: Scalars['Int'];
@@ -196,6 +206,13 @@ export type ResolversParentTypes = ResolversObject<{
   Reason: ReasonModel;
   String: Scalars['String'];
   Transaction: TransactionModel;
+}>;
+
+export type DailyBalanceResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['DailyBalance'] = ResolversParentTypes['DailyBalance']> = ResolversObject<{
+  date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  earning?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  spending?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
@@ -212,6 +229,7 @@ export type MutationResolvers<ContextType = CustomContext, ParentType extends Re
 }>;
 
 export type QueryResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
+  getDailyBalance?: Resolver<Array<ResolversTypes['DailyBalance']>, ParentType, ContextType>;
   getReasons?: Resolver<Maybe<Array<ResolversTypes['Reason']>>, ParentType, ContextType>;
   getTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<QueryGetTransactionArgs, 'id'>>;
   getTransactions?: Resolver<Maybe<Array<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryGetTransactionsArgs, 'take'>>;
@@ -235,6 +253,7 @@ export type TransactionResolvers<ContextType = CustomContext, ParentType extends
 }>;
 
 export type Resolvers<ContextType = CustomContext> = ResolversObject<{
+  DailyBalance?: DailyBalanceResolvers<ContextType>;
   Date?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;

@@ -16,6 +16,12 @@ const typeDefs = /* GraphQL */`
     updatedAt: Date!
   }
 
+  type DailyBalance {
+    date: String!
+    earning: Float!
+    spending: Float!
+  }
+
   type Query {
     getReasons: [Reason!]
     getTransaction(id: Int!): Transaction
@@ -28,6 +34,7 @@ const typeDefs = /* GraphQL */`
       lastCursor: Int
       take: Int = 50
     ): [Transaction!]
+    getDailyBalance: [DailyBalance!]! 
   }
 
   type Mutation {

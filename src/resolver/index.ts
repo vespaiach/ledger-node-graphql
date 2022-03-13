@@ -18,6 +18,11 @@ export const resolvers: Resolvers = {
       const { transactionDs } = context.dataSources;
       return transactionDs.getTransactions(args);
     },
+
+    getDailyBalance: (_, __, context) => {
+      const { dailySpendDs } = context.dataSources;
+      return dailySpendDs.read();
+    },
   },
 
   Transaction: {
@@ -40,13 +45,21 @@ export const resolvers: Resolvers = {
     createTransaction: async (_, args, context) => {
       const { reasonDs, transactionDs } = context.dataSources;
 
-      let reason = await reasonDs.getReasonByText(args.reasonText);
+      const createdReason = await reasonDs.getReasonByText(args.reasonText);
 
-      if (!reason) {
-        reason = await reasonDs.createReason({ text: args.reasonText });
+      if (createdReason) {
+        return transactionDs.createTransaction({ ...args, reasonId: createdReason.id });
       }
 
-      return transactionDs.createTransaction({ ...args, reasonId: reason.id });
+      const reason = await reasonDs.createReason({ text: args.reasonText }, [
+        { amount: args.amount, date: args.date, note: args.note },
+      ]);
+
+      if (!reason.transactions?.[0]) {
+        throw new ApolloError("Couldn't create transaction");
+      }
+
+      return reason.transactions[0];
     },
 
     updateTransaction: async (_, args, context) => {
