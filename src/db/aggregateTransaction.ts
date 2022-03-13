@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 
-import { DailySpend } from '../datasource/dailySpend';
+import { DailySpendDS } from '../datasource/dailySpend';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  await new DailySpend(prisma).update();
+  await new DailySpendDS(prisma).update();
 }
 
 main()
