@@ -13,23 +13,10 @@ import { TransactionDS } from '@datasource/transaction';
 import { DailySpendDS } from '@datasource/dailySpend';
 import { TokenDS } from '@datasource/token';
 import { GmailSmtp } from '@datasource/smtp';
-
-const port = process.env.LEDGER_PORT || 3333;
-const key = process.env.LEDGER_KEY || 'dev.key';
-const cert = process.env.LEDGER_CERT || 'dev.crt';
-const isProduction = process.env.NODE_ENV === 'production';
-const user = process.env.GMAIL_USER || '';
-const pass = process.env.GMAIL_PASS || '';
-const baseUrl = isProduction ? 'http://localhost:3000/token' : 'http://localhost:3000/token';
-
-let allowEmails: string[] | null = null;
-
-if (!process.env.LEDGER_LOGIN?.length) allowEmails = [];
-else if (process.env.LEDGER_LOGIN !== '*') {
-  allowEmails = process.env.LEDGER_LOGIN.split(',');
-}
+import Config from './config';
 
 (async function startServer() {
+  const isProduction = Config.get('environment') === 'production';
   const app = express();
 
   let httpServer;
@@ -37,8 +24,8 @@ else if (process.env.LEDGER_LOGIN !== '*') {
   if (isProduction) {
     httpServer = https.createServer(
       {
-        key: fs.readFileSync(key),
-        cert: fs.readFileSync(cert),
+        key: fs.readFileSync(Config.get('ssl_certificates')?.key as string),
+        cert: fs.readFileSync(Config.get('ssl_certificates')?.cert as string),
       },
       app
     );
@@ -54,18 +41,22 @@ else if (process.env.LEDGER_LOGIN !== '*') {
       reasonDs: new ReasonDS(dbClient),
       transactionDs: new TransactionDS(dbClient),
       dailySpendDs: new DailySpendDS(dbClient),
-      tokenDs: new TokenDS(dbClient, allowEmails),
-      smtpDs: new GmailSmtp(user, pass, baseUrl),
+      tokenDs: new TokenDS(dbClient),
+      smtpDs: new GmailSmtp(
+        Config.get('smtp_credentials'),
+        Config.get('signin_email_template'),
+        Config.get('frontend_base_url')
+      ),
     }),
-    context: { allowEmails },
+    context: { appConfig: Config },
   });
 
   await server.start();
 
   server.applyMiddleware({ app });
 
-  await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
+  await new Promise<void>((resolve) => httpServer.listen({ port: Config.get('app_port') }, resolve));
   console.log(
-    `🚀 Server ready at http${isProduction ? 's' : ''}://localhost:${port}${server.graphqlPath}`
+    `🚀 Server ready at http${isProduction ? 's' : ''}://localhost:${Config.get('app_port')}${server.graphqlPath}`
   );
 })();

@@ -3,12 +3,10 @@ import { PrismaClient, Token } from '@prisma/client';
 
 export class TokenDS extends DataSource {
   dbClient: PrismaClient;
-  allowEmails: null | string[];
 
-  constructor(dbClient: PrismaClient, allowEmails: null | string[] = null) {
+  constructor(dbClient: PrismaClient) {
     super();
     this.dbClient = dbClient;
-    this.allowEmails = allowEmails;
   }
 
   public async getLatestActiveRecord({
