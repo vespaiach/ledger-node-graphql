@@ -1,4 +1,4 @@
-import { PrismaClient, Reason, Transaction, DailySpend, Token } from '@prisma/client';
+import { Reason, Transaction, DailySpend, Token } from '@prisma/client';
 import { ReasonDS } from 'src/datasource/reason';
 import { TransactionDS } from 'src/datasource/transaction';
 import { DailySpendDS } from 'src/datasource/dailySpend';
@@ -6,7 +6,7 @@ import { TokenDS } from '@datasource/token';
 import { GmailSmtp } from '@datasource/smtp';
 
 export interface CustomContext {
-  prisma: PrismaClient;
+  allowEmails: string[] | null;
   dataSources: {
     reasonDs: ReasonDS;
     transactionDs: TransactionDS;

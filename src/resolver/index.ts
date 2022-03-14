@@ -101,16 +101,31 @@ export const resolvers: Resolvers = {
       return reasonDs.updateReason(args);
     },
 
-    signin: async (_, args, context) => {
-      if (emailValidator.validate(args.email)) throw new ApolloError('Invalid email address');
+    signin: async (_, { email }, context) => {
+      if (!emailValidator.validate(email)) return 'invalid email address';
 
+      const { allowEmails } = context;
       const { tokenDs, smtpDs } = context.dataSources;
 
-      if (!tokenDs.checkEmail(args.email)) return 'not allow';
+      /**
+       * Check if email address is allowed to sign in.
+       * Config in: LEDGER_LOGIN
+       */
+      if (allowEmails?.length && !allowEmails.includes(email))
+        return "the email address isn't allowed to sign in";
+
+      /**
+       * Stop users from spamming emails too much.
+       */
+      const lastSeen = new Date();
+      lastSeen.setMinutes(-2);
+      const record = await tokenDs.getLatestActiveRecord({ email, lastSeen });
+      if (record !== null)
+        return 'an instruction email has been sent to the email address, please follow that email to sign in.';
 
       const key = uuidv4();
 
-      await Promise.all([tokenDs.create({ key }), smtpDs.send(args.email, key)]);
+      await Promise.all([tokenDs.create({ key, email }), smtpDs.send(email, key)]);
 
       return 'sent';
     },

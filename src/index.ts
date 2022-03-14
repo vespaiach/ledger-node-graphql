@@ -57,6 +57,7 @@ else if (process.env.LEDGER_LOGIN !== '*') {
       tokenDs: new TokenDS(dbClient, allowEmails),
       smtpDs: new GmailSmtp(user, pass, baseUrl),
     }),
+    context: { allowEmails },
   });
 
   await server.start();

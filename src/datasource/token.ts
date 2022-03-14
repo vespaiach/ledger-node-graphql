@@ -1,21 +1,5 @@
 import { DataSource } from 'apollo-datasource';
-import { PrismaClient } from '@prisma/client';
-
-import { ReasonModel, TransactionModel } from '@schema/types';
-import {
-  MutationCreateReasonArgs,
-  MutationCreateTransactionArgs,
-  MutationDeleteReasonArgs,
-  MutationUpdateReasonArgs,
-} from '@schema/types.generated';
-
-export type Token = {
-  token: string;
-  key: string;
-  createdAt: Date;
-  revoke: boolean;
-  revokedAt: Date | null;
-};
+import { PrismaClient, Token } from '@prisma/client';
 
 export class TokenDS extends DataSource {
   dbClient: PrismaClient;
@@ -27,29 +11,32 @@ export class TokenDS extends DataSource {
     this.allowEmails = allowEmails;
   }
 
-  public allow(email: string): boolean {
-    if (this.allowEmails === null) return true;
-
-    return this.allowEmails.includes(email);
-  }
-
-  public async checkSendingInterval(email: string): boolean {
-    const record = await this.dbClient.token.findFirst({
+  public async getLatestActiveRecord({
+    email,
+    lastSeen,
+  }: {
+    email: string;
+    lastSeen: Date;
+  }): Promise<Token | null> {
+    return this.dbClient.token.findFirst({
       orderBy: {
         createdAt: 'desc',
       },
       where: {
         email,
         token: null,
+        createdAt: {
+          gt: lastSeen,
+        },
       },
-      select: { createdAt: true },
     });
   }
 
-  public async create(args: { key: string }): Promise<void> {
+  public async create({ email, key }: { key: string; email: string }): Promise<void> {
     await this.dbClient.token.create({
       data: {
-        key: args.key,
+        email,
+        key,
         createdAt: new Date(),
       },
     });
@@ -80,75 +67,5 @@ export class TokenDS extends DataSource {
         },
       })
     ).map((t) => t.token) as string[];
-  }
-
-  /**
-   * Prisma return null if it can't find the record.
-   */
-  public getReasonById(id: number): Promise<ReasonModel | null> {
-    return this.dbClient.reason.findUnique({
-      where: {
-        id,
-      },
-      select: {
-        id: true,
-        text: true,
-        updatedAt: true,
-      },
-    });
-  }
-
-  public getReasonByText(text: string): Promise<ReasonModel | null> {
-    return this.dbClient.reason.findUnique({
-      where: {
-        text,
-      },
-      select: {
-        id: true,
-        text: true,
-        updatedAt: true,
-      },
-    });
-  }
-
-  public createReason(
-    args: MutationCreateReasonArgs,
-    transactions?: Omit<MutationCreateTransactionArgs, 'reasonText'>[]
-  ): Promise<ReasonModel & { transactions?: TransactionModel[] }> {
-    return this.dbClient.reason.create({
-      include: { transactions: true },
-      data: {
-        text: args.text,
-        updatedAt: new Date(),
-        transactions: transactions?.length
-          ? {
-              create: transactions,
-            }
-          : undefined,
-      },
-    });
-  }
-
-  public updateReason(args: MutationUpdateReasonArgs): Promise<ReasonModel> {
-    return this.dbClient.reason.update({
-      include: {
-        transactions: true,
-      },
-      data: {
-        text: args.text ? args.text : undefined,
-        updatedAt: new Date(),
-      },
-      where: {
-        id: args.id,
-      },
-    });
-  }
-
-  public async deleteReason(args: MutationDeleteReasonArgs): Promise<void> {
-    await this.dbClient.reason.delete({
-      where: {
-        id: args.id,
-      },
-    });
   }
 }
