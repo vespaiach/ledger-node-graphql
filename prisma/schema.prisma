@@ -38,6 +38,7 @@ model DailySpend {
 
 model Token {
   key       String    @id @db.VarChar(36)
+  email     String    @db.VarChar(128)
   token     String?   @unique
   createdAt DateTime  @default(now()) @map("created_at")
   revoke    Boolean   @default(false)

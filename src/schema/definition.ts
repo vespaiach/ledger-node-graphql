@@ -46,7 +46,7 @@ const typeDefs = /* GraphQL */`
     updateTransaction(id: Int!, date: Date, amount: Float, reasonText: String, note: String): Transaction
     deleteTransaction(id: Int!): Boolean
 
-    signin(email: String!): Boolean!
+    signin(email: String!): String!
     token(key: String!): String!
   }
 

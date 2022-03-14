@@ -27,10 +27,23 @@ export class TokenDS extends DataSource {
     this.allowEmails = allowEmails;
   }
 
-  public checkEmail(email: string): boolean {
+  public allow(email: string): boolean {
     if (this.allowEmails === null) return true;
 
     return this.allowEmails.includes(email);
+  }
+
+  public async checkSendingInterval(email: string): boolean {
+    const record = await this.dbClient.token.findFirst({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      where: {
+        email,
+        token: null,
+      },
+      select: { createdAt: true },
+    });
   }
 
   public async create(args: { key: string }): Promise<void> {

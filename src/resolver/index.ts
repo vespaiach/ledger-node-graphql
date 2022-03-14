@@ -1,5 +1,6 @@
 import { ApolloError } from 'apollo-server-errors';
 import { v4 as uuidv4 } from 'uuid';
+import * as emailValidator from 'email-validator';
 
 import { Resolvers } from '@schema/types.generated';
 
@@ -101,15 +102,17 @@ export const resolvers: Resolvers = {
     },
 
     signin: async (_, args, context) => {
+      if (emailValidator.validate(args.email)) throw new ApolloError('Invalid email address');
+
       const { tokenDs, smtpDs } = context.dataSources;
 
-      if (!tokenDs.checkEmail(args.email)) return false;
+      if (!tokenDs.checkEmail(args.email)) return 'not allow';
 
       const key = uuidv4();
 
       await Promise.all([tokenDs.create({ key }), smtpDs.send(args.email, key)]);
 
-      return true;
+      return 'sent';
     },
   },
 };

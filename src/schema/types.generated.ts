@@ -29,7 +29,7 @@ export type Mutation = {
   createTransaction?: Maybe<Transaction>;
   deleteReason?: Maybe<Scalars['Boolean']>;
   deleteTransaction?: Maybe<Scalars['Boolean']>;
-  signin: Scalars['Boolean'];
+  signin: Scalars['String'];
   token: Scalars['String'];
   updateReason?: Maybe<Reason>;
   updateTransaction?: Maybe<Transaction>;
@@ -236,7 +236,7 @@ export type MutationResolvers<ContextType = CustomContext, ParentType extends Re
   createTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<MutationCreateTransactionArgs, 'amount' | 'date' | 'reasonText'>>;
   deleteReason?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteReasonArgs, 'id'>>;
   deleteTransaction?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTransactionArgs, 'id'>>;
-  signin?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationSigninArgs, 'email'>>;
+  signin?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationSigninArgs, 'email'>>;
   token?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationTokenArgs, 'key'>>;
   updateReason?: Resolver<Maybe<ResolversTypes['Reason']>, ParentType, ContextType, RequireFields<MutationUpdateReasonArgs, 'id' | 'text'>>;
   updateTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<MutationUpdateTransactionArgs, 'id'>>;
