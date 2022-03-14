@@ -29,9 +29,19 @@ model Transaction {
 }
 
 model DailySpend {
-  date     String  @id
+  date     String  @id @db.VarChar(27)
   spending Decimal @db.Decimal(15, 2)
   earning  Decimal @db.Decimal(15, 2)
 
   @@map("daily_spends")
+}
+
+model Token {
+  key       String    @id @db.VarChar(36)
+  token     String?   @unique
+  createdAt DateTime  @default(now()) @map("created_at")
+  revoke    Boolean   @default(false)
+  revokedAt DateTime? @map("revoked_at")
+
+  @@map("token")
 }

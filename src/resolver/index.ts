@@ -1,4 +1,5 @@
 import { ApolloError } from 'apollo-server-errors';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Resolvers } from '@schema/types.generated';
 
@@ -97,6 +98,18 @@ export const resolvers: Resolvers = {
       const { reasonDs } = context.dataSources;
 
       return reasonDs.updateReason(args);
+    },
+
+    signin: async (_, args, context) => {
+      const { tokenDs, smtpDs } = context.dataSources;
+
+      if (!tokenDs.checkEmail(args.email)) return false;
+
+      const key = uuidv4();
+
+      await Promise.all([tokenDs.create({ key }), smtpDs.send(args.email, key)]);
+
+      return true;
     },
   },
 };
