@@ -9,6 +9,12 @@ export class TokenDS extends DataSource {
     this.dbClient = dbClient;
   }
 
+  public async getRecordByKey({ key }: { key: string }): Promise<Token | null> {
+    return this.dbClient.token.findFirst({
+      where: { key },
+    });
+  }
+
   public async getLatestActiveRecord({
     email,
     lastSeen,
@@ -16,6 +22,7 @@ export class TokenDS extends DataSource {
     email: string;
     lastSeen: Date;
   }): Promise<Token | null> {
+    console.log(email, lastSeen)
     return this.dbClient.token.findFirst({
       orderBy: {
         createdAt: 'desc',

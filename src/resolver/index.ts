@@ -1,6 +1,7 @@
 import { ApolloError } from 'apollo-server-errors';
 import { v4 as uuidv4 } from 'uuid';
 import * as emailValidator from 'email-validator';
+import jwt from 'jsonwebtoken';
 
 import { Resolvers } from '@schema/types.generated';
 
@@ -104,21 +105,25 @@ export const resolvers: Resolvers = {
     signin: async (_, { email }, context) => {
       if (!emailValidator.validate(email)) return 'invalid email address';
 
-      const { allowEmails } = context;
+      const { appConfig } = context;
       const { tokenDs, smtpDs } = context.dataSources;
 
       /**
        * Check if email address is allowed to sign in.
        * Config in: LEDGER_LOGIN
        */
-      if (allowEmails?.length && !allowEmails.includes(email))
+      if (
+        appConfig.get('authorized_emails')?.length &&
+        !appConfig.get('authorized_emails')?.includes(email)
+      ) {
         return "the email address isn't allowed to sign in";
+      }
 
       /**
        * Stop users from spamming emails too much.
        */
       const lastSeen = new Date();
-      lastSeen.setMinutes(-2);
+      lastSeen.setMinutes(lastSeen.getMinutes() - appConfig.get('signin_key_available_time'));
       const record = await tokenDs.getLatestActiveRecord({ email, lastSeen });
       if (record !== null)
         return 'an instruction email has been sent to the email address, please follow that email to sign in.';
@@ -128,6 +133,27 @@ export const resolvers: Resolvers = {
       await Promise.all([tokenDs.create({ key, email }), smtpDs.send(email, key)]);
 
       return 'sent';
+    },
+
+    token: async (_, { key }, context) => {
+      const { appConfig } = context;
+      const { tokenDs } = context.dataSources;
+
+      const record = await tokenDs.getRecordByKey({ key });
+
+      const expire = new Date();
+      expire.setMinutes(expire.getMinutes() - appConfig.get('signin_key_available_time'));
+
+      if (!record || record.createdAt <= expire) {
+        throw new ApolloError("Sign in key didn't exist or expired.");
+      }
+
+      const expiresIn =
+        Math.round(Date.now() / 1000) + appConfig.get('signin_token_available_time') * 60;
+
+      return jwt.sign({ email: record.email, exp: expiresIn }, appConfig.get('signin_jwt_key'), {
+        algorithm: appConfig.get('signin_jwt_algorithm'),
+      });
     },
   },
 };

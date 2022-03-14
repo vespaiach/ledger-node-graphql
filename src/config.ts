@@ -1,3 +1,5 @@
+import { Algorithm } from 'jsonwebtoken';
+
 export type ConfigurationValues = {
   app_port: number;
   database_url: string;
@@ -22,6 +24,10 @@ export type ConfigurationValues = {
   };
   environment: string;
   frontend_base_url: string;
+  signin_key_available_time: number; // in minutes
+  signin_token_available_time: number; // in minutes
+  signin_jwt_key: string;
+  signin_jwt_algorithm: Algorithm;
 };
 
 class Config {
@@ -44,6 +50,10 @@ class Config {
       LEDGER_SIGNIN_EMAIL_FROM,
       LEDGER_SIGNIN_EMAIL_SUBJECT = 'Ledger Sign In',
       LEDGER_SIGNIN_EMAIL_TEMPLATE,
+      LEDGER_SIGNIN_KEY_AVAILABLE_TIME = '2',
+      LEDGER_SIGNIN_TOKEN_AVAILABLE_TIME = '1440',
+      LEDGER_SIGNIN_JWT_SECRET,
+      LEDGER_SIGNIN_JWT_ALGORITHM = 'HS256',
       NODE_ENV = 'development',
     } = process.env;
 
@@ -52,8 +62,9 @@ class Config {
     this.throwIf(!LEDGER_SIGNIN_EMAIL_FROM, "sign-in email's sender is required");
     this.throwIf(!LEDGER_SIGNIN_EMAIL_SUBJECT, 'sign-in email subject is required');
     this.throwIf(!LEDGER_SIGNIN_EMAIL_TEMPLATE, 'sign-in email template is required');
-    this.throwIf(!LEDGER_SMTP_USER, 'smtp user is require');
-    this.throwIf(!LEDGER_SMTP_PASS, 'smtp pass is require');
+    this.throwIf(!LEDGER_SMTP_USER, 'smtp user is required');
+    this.throwIf(!LEDGER_SMTP_PASS, 'smtp pass is required');
+    this.throwIf(!LEDGER_SIGNIN_JWT_SECRET?.length, 'jwt secret is required');
     this.throwIf(
       NODE_ENV === 'production' && (!LEDGER_SSL_KEY || !LEDGER_SSL_CERT),
       'ssl key/cert are required'
@@ -69,6 +80,10 @@ class Config {
         subject: LEDGER_SIGNIN_EMAIL_SUBJECT as string,
         template: LEDGER_SIGNIN_EMAIL_TEMPLATE as string,
       },
+      signin_key_available_time: Number(LEDGER_SIGNIN_KEY_AVAILABLE_TIME),
+      signin_token_available_time: Number(LEDGER_SIGNIN_TOKEN_AVAILABLE_TIME),
+      signin_jwt_key: LEDGER_SIGNIN_JWT_SECRET as string,
+      signin_jwt_algorithm: LEDGER_SIGNIN_JWT_ALGORITHM as Algorithm,
       smtp_credentials: {
         host: 'smtp.gmail.com',
         port: 465,
@@ -89,8 +104,9 @@ class Config {
     };
   }
 
-  public get<T extends keyof ConfigurationValues>(key: T) {
-    return this.configs[key];
+  public get<T extends keyof ConfigurationValues>(key: T, defaultValue?: ConfigurationValues[T]) {
+    const value = this.configs[key];
+    return value === undefined || value === null ? defaultValue || value : value;
   }
 }
 

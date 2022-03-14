@@ -4,9 +4,10 @@ import { TransactionDS } from 'src/datasource/transaction';
 import { DailySpendDS } from 'src/datasource/dailySpend';
 import { TokenDS } from '@datasource/token';
 import { GmailSmtp } from '@datasource/smtp';
+import Config from 'src/config';
 
 export interface CustomContext {
-  allowEmails: string[] | null;
+  appConfig: typeof Config;
   dataSources: {
     reasonDs: ReasonDS;
     transactionDs: TransactionDS;
