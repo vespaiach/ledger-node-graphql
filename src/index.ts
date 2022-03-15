@@ -37,6 +37,7 @@ import Config from './config';
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    introspection: true, // Should be disabled on production 
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     dataSources: () => ({
       reasonDs: new ReasonDS(dbClient),
