@@ -47,7 +47,7 @@ const typeDefs = /* GraphQL */`
     deleteTransaction(id: Int!): Boolean
 
     signin(email: String!): String!
-    token(key: String!): String
+    token(key: String!): String!
   }
 
 `;

@@ -1,28 +1,43 @@
-import { ApolloError } from 'apollo-server-errors';
+import { ApolloError, AuthenticationError } from 'apollo-server-errors';
 import { v4 as uuidv4 } from 'uuid';
 import * as emailValidator from 'email-validator';
 import jwt from 'jsonwebtoken';
 
 import { Resolvers } from '@schema/types.generated';
+import { CustomContext } from '@schema/types';
+
+function requireAuth(context: CustomContext) {
+  const { isSignin } = context;
+
+  if (!isSignin) throw new AuthenticationError('sign-in to continue');
+}
 
 export const resolvers: Resolvers = {
   Query: {
     getReasons: (_, __, context) => {
+      requireAuth(context);
+
       const { reasonDs } = context.dataSources;
       return reasonDs.getReasons();
     },
 
     getTransaction: (_, args, context) => {
+      requireAuth(context);
+
       const { transactionDs } = context.dataSources;
       return transactionDs.getTransaction(args);
     },
 
     getTransactions: (_, args, context) => {
+      requireAuth(context);
+
       const { transactionDs } = context.dataSources;
       return transactionDs.getTransactions(args);
     },
 
     getDailyBalance: (_, __, context) => {
+      requireAuth(context);
+
       const { dailySpendDs } = context.dataSources;
       return dailySpendDs.read();
     },
@@ -33,6 +48,8 @@ export const resolvers: Resolvers = {
      * Prisma will resolve the n+1 problem. Don't need DataLoader lib.
      */
     reason: async (trans, _, context) => {
+      requireAuth(context);
+
       const { reasonDs } = context.dataSources;
       const reason = await reasonDs.getReasonById(trans.reasonId);
 
@@ -46,6 +63,8 @@ export const resolvers: Resolvers = {
 
   Mutation: {
     createTransaction: async (_, args, context) => {
+      requireAuth(context);
+
       const { reasonDs, transactionDs } = context.dataSources;
 
       const createdReason = await reasonDs.getReasonByText(args.reasonText);
@@ -66,6 +85,8 @@ export const resolvers: Resolvers = {
     },
 
     updateTransaction: async (_, args, context) => {
+      requireAuth(context);
+
       const { reasonDs, transactionDs } = context.dataSources;
 
       let reasonId: number | undefined = undefined;
@@ -83,6 +104,8 @@ export const resolvers: Resolvers = {
     },
 
     deleteTransaction: async (_, args, context) => {
+      requireAuth(context);
+
       const { transactionDs } = context.dataSources;
 
       await transactionDs.deleteTransaction(args);
@@ -91,12 +114,16 @@ export const resolvers: Resolvers = {
     },
 
     createReason: (_, args, context) => {
+      requireAuth(context);
+
       const { reasonDs } = context.dataSources;
 
       return reasonDs.createReason(args);
     },
 
     updateReason: (_, args, context) => {
+      requireAuth(context);
+
       const { reasonDs } = context.dataSources;
 
       return reasonDs.updateReason(args);
@@ -151,7 +178,7 @@ export const resolvers: Resolvers = {
       const expiresIn =
         Math.round(Date.now() / 1000) + appConfig.get('signin_token_available_time') * 60;
 
-      return jwt.sign({ email: record.email, exp: expiresIn }, appConfig.get('signin_jwt_key'), {
+      return jwt.sign({ email: record.email, exp: expiresIn }, appConfig.get('signin_jwt_secret'), {
         algorithm: appConfig.get('signin_jwt_algorithm'),
       });
     },

@@ -4,6 +4,7 @@ import express from 'express';
 import https from 'https';
 import http from 'http';
 import fs from 'fs';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 import { typeDefs } from '@schema/definition';
 import { ReasonDS } from '@datasource/reason';
@@ -48,15 +49,35 @@ import Config from './config';
         Config.get('frontend_base_url')
       ),
     }),
-    context: { appConfig: Config },
+    context: ({ req }) => {
+      const token = req.headers.authorization || '';
+      let tokenPayload: JwtPayload | null = null;
+      let isSignin = false;
+
+      try {
+        tokenPayload = token
+          ? (jwt.verify(token, Config.get('signin_jwt_secret')) as JwtPayload)
+          : null;
+
+        isSignin = !!tokenPayload;
+      } catch (e) {
+        console.log(e);
+      }
+
+      return { tokenPayload, isSignin, appConfig: Config };
+    },
   });
 
   await server.start();
 
   server.applyMiddleware({ app });
 
-  await new Promise<void>((resolve) => httpServer.listen({ port: Config.get('app_port') }, resolve));
+  await new Promise<void>((resolve) =>
+    httpServer.listen({ port: Config.get('app_port') }, resolve)
+  );
   console.log(
-    `🚀 Server ready at http${isProduction ? 's' : ''}://localhost:${Config.get('app_port')}${server.graphqlPath}`
+    `🚀 Server ready at http${isProduction ? 's' : ''}://localhost:${Config.get('app_port')}${
+      server.graphqlPath
+    }`
   );
 })();

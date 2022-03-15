@@ -26,7 +26,7 @@ export type ConfigurationValues = {
   frontend_base_url: string;
   signin_key_available_time: number; // in minutes
   signin_token_available_time: number; // in minutes
-  signin_jwt_key: string;
+  signin_jwt_secret: string;
   signin_jwt_algorithm: Algorithm;
 };
 
@@ -82,7 +82,7 @@ class Config {
       },
       signin_key_available_time: Number(LEDGER_SIGNIN_KEY_AVAILABLE_TIME),
       signin_token_available_time: Number(LEDGER_SIGNIN_TOKEN_AVAILABLE_TIME),
-      signin_jwt_key: LEDGER_SIGNIN_JWT_SECRET as string,
+      signin_jwt_secret: LEDGER_SIGNIN_JWT_SECRET as string,
       signin_jwt_algorithm: LEDGER_SIGNIN_JWT_ALGORITHM as Algorithm,
       smtp_credentials: {
         host: 'smtp.gmail.com',
