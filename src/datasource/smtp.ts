@@ -26,7 +26,9 @@ export class GmailSmtp extends DataSource {
         from: this.emailConfig.from,
         to,
         subject: this.emailConfig.subject,
-        html: this.emailConfig.template.replace('{{link}}', `${this.frontendBaseUrl}?token=${key}`),
+        html: this.emailConfig.template
+          .replace('{{link}}', `${this.frontendBaseUrl}?token=${key}`)
+          .replace('{{key}}', key),
       };
 
       this.transport.sendMail(message, function (err) {
