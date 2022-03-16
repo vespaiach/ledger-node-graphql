@@ -153,7 +153,7 @@ export const resolvers: Resolvers = {
       lastSeen.setMinutes(lastSeen.getMinutes() - appConfig.get('signin_key_available_time'));
       const record = await tokenDs.getLatestActiveRecord({ email, lastSeen });
       if (record !== null)
-        return 'an instruction email has been sent to the email address, please follow that email to sign in.';
+        return 'an instruction has been sent to the email address, please follow that email to sign in.';
 
       const key = uuidv4();
 

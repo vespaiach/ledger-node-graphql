@@ -5,19 +5,17 @@
       "name": "Launch Debugger",
       "request": "launch",
       "runtimeArgs": [
-        "node",
-        "--debug",
-        "--transpile-only",
-        "--prefer-ts",
         "-r",
-        "tsconfig-paths/register"
+        "${workspaceFolder}/node_modules/ts-node/register",
+        "-r",
+        "${workspaceFolder}/node_modules/tsconfig-paths/register"
       ],
-      "args": ["src/index.ts"],
-      "runtimeExecutable": "node",
+      "protocol": "inspector",
+      "envFile": "${workspaceFolder}/.env",
+      "args": ["./src/index.ts"],
       "skipFiles": ["<node_internals>/**"],
       "cwd": "${workspaceRoot}",
-      "type": "node",
-      "envFile": "${workspaceFolder}/.env"
+      "type": "node"
     }
   ]
 }

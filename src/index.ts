@@ -37,7 +37,6 @@ import Config from './config';
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    introspection: true, // Should be disabled on production 
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     dataSources: () => ({
       reasonDs: new ReasonDS(dbClient),
@@ -50,6 +49,7 @@ import Config from './config';
         Config.get('frontend_base_url')
       ),
     }),
+
     context: ({ req }) => {
       const token = req.headers.authorization || '';
       let tokenPayload: JwtPayload | null = null;
