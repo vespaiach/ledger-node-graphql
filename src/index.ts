@@ -51,7 +51,7 @@ import Config from './config';
     }),
 
     context: ({ req }) => {
-      const token = req.headers.authorization || '';
+      const token = (req.headers.authorization || '').replace('Bearer ', '');
       let tokenPayload: JwtPayload | null = null;
       let isSignin = false;
 
