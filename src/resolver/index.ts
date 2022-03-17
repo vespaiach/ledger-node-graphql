@@ -178,9 +178,26 @@ export const resolvers: Resolvers = {
       const expiresIn =
         Math.round(Date.now() / 1000) + appConfig.get('signin_token_available_time') * 60;
 
-      return jwt.sign({ email: record.email, exp: expiresIn }, appConfig.get('signin_jwt_secret'), {
-        algorithm: appConfig.get('signin_jwt_algorithm'),
-      });
+      const token = jwt.sign(
+        { email: record.email, exp: expiresIn },
+        appConfig.get('signin_jwt_secret'),
+        {
+          algorithm: appConfig.get('signin_jwt_algorithm'),
+        }
+      );
+
+      await tokenDs.update({ token, key });
+
+      return token;
+    },
+
+    signout: async (_, __, context) => {
+      const { token } = context;
+      const { tokenDs } = context.dataSources;
+
+      if (token) {
+        await tokenDs.revoke({ token });
+      }
     },
   },
 };

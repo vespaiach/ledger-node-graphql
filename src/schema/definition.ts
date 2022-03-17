@@ -1,5 +1,6 @@
 const typeDefs = /* GraphQL */`
   scalar Date
+  scalar Void
 
   type Transaction {
     id: Int!
@@ -48,6 +49,7 @@ const typeDefs = /* GraphQL */`
 
     signin(email: String!): String!
     token(key: String!): String!
+    signout: Void
   }
 
 `;

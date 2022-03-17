@@ -65,7 +65,7 @@ import Config from './config';
         console.log(e);
       }
 
-      return { tokenPayload, isSignin, appConfig: Config };
+      return { token, tokenPayload, isSignin, appConfig: Config };
     },
   });
 

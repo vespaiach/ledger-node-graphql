@@ -22,7 +22,7 @@ export class TokenDS extends DataSource {
     email: string;
     lastSeen: Date;
   }): Promise<Token | null> {
-    console.log(email, lastSeen)
+    console.log(email, lastSeen);
     return this.dbClient.token.findFirst({
       orderBy: {
         createdAt: 'desc',
@@ -43,6 +43,18 @@ export class TokenDS extends DataSource {
         email,
         key,
         createdAt: new Date(),
+      },
+    });
+  }
+
+  public async revoke({ token }: { token: string }): Promise<void> {
+    await this.dbClient.token.update({
+      where: {
+        token,
+      },
+      data: {
+        revoke: true,
+        revokedAt: new Date(),
       },
     });
   }

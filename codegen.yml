@@ -8,6 +8,7 @@ generates:
     config:
       scalars:
         Date: Date
+        Void: void
       useIndexSignature: true
       contextType: ./types#CustomContext
       maybeValue: T | null | undefined

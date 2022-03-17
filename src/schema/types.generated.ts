@@ -14,6 +14,7 @@ export type Scalars = {
   Int: number;
   Float: number;
   Date: Date;
+  Void: void;
 };
 
 export type DailyBalance = {
@@ -30,6 +31,7 @@ export type Mutation = {
   deleteReason?: Maybe<Scalars['Boolean']>;
   deleteTransaction?: Maybe<Scalars['Boolean']>;
   signin: Scalars['String'];
+  signout?: Maybe<Scalars['Void']>;
   token: Scalars['String'];
   updateReason?: Maybe<Reason>;
   updateTransaction?: Maybe<Transaction>;
@@ -204,6 +206,7 @@ export type ResolversTypes = ResolversObject<{
   Reason: ResolverTypeWrapper<ReasonModel>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Transaction: ResolverTypeWrapper<TransactionModel>;
+  Void: ResolverTypeWrapper<Scalars['Void']>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -218,6 +221,7 @@ export type ResolversParentTypes = ResolversObject<{
   Reason: ReasonModel;
   String: Scalars['String'];
   Transaction: TransactionModel;
+  Void: Scalars['Void'];
 }>;
 
 export type DailyBalanceResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['DailyBalance'] = ResolversParentTypes['DailyBalance']> = ResolversObject<{
@@ -237,6 +241,7 @@ export type MutationResolvers<ContextType = CustomContext, ParentType extends Re
   deleteReason?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteReasonArgs, 'id'>>;
   deleteTransaction?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTransactionArgs, 'id'>>;
   signin?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationSigninArgs, 'email'>>;
+  signout?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   token?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationTokenArgs, 'key'>>;
   updateReason?: Resolver<Maybe<ResolversTypes['Reason']>, ParentType, ContextType, RequireFields<MutationUpdateReasonArgs, 'id' | 'text'>>;
   updateTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<MutationUpdateTransactionArgs, 'id'>>;
@@ -266,6 +271,10 @@ export type TransactionResolvers<ContextType = CustomContext, ParentType extends
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export interface VoidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Void'], any> {
+  name: 'Void';
+}
+
 export type Resolvers<ContextType = CustomContext> = ResolversObject<{
   DailyBalance?: DailyBalanceResolvers<ContextType>;
   Date?: GraphQLScalarType;
@@ -273,5 +282,6 @@ export type Resolvers<ContextType = CustomContext> = ResolversObject<{
   Query?: QueryResolvers<ContextType>;
   Reason?: ReasonResolvers<ContextType>;
   Transaction?: TransactionResolvers<ContextType>;
+  Void?: GraphQLScalarType;
 }>;
 

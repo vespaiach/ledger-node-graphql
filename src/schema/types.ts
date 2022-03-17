@@ -10,6 +10,7 @@ import Config from 'src/config';
 export interface CustomContext {
   appConfig: typeof Config;
   tokenPayload: JwtPayload | null;
+  token: string;
   isSignin: boolean;
   dataSources: {
     reasonDs: ReasonDS;
