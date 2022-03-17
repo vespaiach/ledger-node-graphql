@@ -49,7 +49,7 @@ class Config {
       LEDGER_SMTP_PASS,
       LEDGER_SIGNIN_EMAIL_FROM,
       LEDGER_SIGNIN_EMAIL_SUBJECT = 'Ledger Sign In',
-      LEDGER_SIGNIN_EMAIL_TEMPLATE,
+      LEDGER_SIGNIN_EMAIL_TEMPLATE = '<h3>Ledger</h3><p>Please use the sign-in key <string>{{key}}</strong> to sign in, or click on this link {{link}}.</p>',
       LEDGER_SIGNIN_KEY_AVAILABLE_TIME = '2',
       LEDGER_SIGNIN_TOKEN_AVAILABLE_TIME = '1440',
       LEDGER_SIGNIN_JWT_SECRET,

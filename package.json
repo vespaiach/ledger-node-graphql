@@ -26,12 +26,12 @@
     "uuid": "^8.3.2"
   },
   "scripts": {
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate | npm run gentype",
     "dev": "DEBUG=express:* ts-node -r tsconfig-paths/register ./src/index.ts",
+    "start": "node ./build/index.js",
     "build": "tsc -p . && tscpaths -p tsconfig.json -s ./src -o ./build",
     "gentype": "graphql-codegen --config codegen.yml",
     "seed": "ts-node ./src/db/seed.ts",
-    "start": "node ./build/index.js",
     "migrate": "prisma migrate dev"
   },
   "devDependencies": {
