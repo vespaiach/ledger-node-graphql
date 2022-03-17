@@ -15,6 +15,12 @@ export class TokenDS extends DataSource {
     });
   }
 
+  public async getRecordByToken({ token }: { token: string }): Promise<Token | null> {
+    return this.dbClient.token.findFirst({
+      where: { token },
+    });
+  }
+
   public async getLatestActiveRecord({
     email,
     lastSeen,
@@ -53,36 +59,28 @@ export class TokenDS extends DataSource {
         token,
       },
       data: {
-        revoke: true,
         revokedAt: new Date(),
       },
     });
   }
 
-  public async update(args: { revoke?: boolean; key: string; token?: string }): Promise<void> {
+  public async update(args: { revokedAt?: Date; key: string; token?: string }): Promise<void> {
     await this.dbClient.token.update({
       where: {
         key: args.key,
       },
       data: {
         token: args.token ? args.token : undefined,
-        revoke: typeof args.revoke === 'boolean' ? args.revoke : undefined,
-        revokedAt: typeof args.revoke === 'boolean' ? new Date() : undefined,
+        revokedAt: args.revokedAt ? args.revokedAt : undefined,
       },
     });
   }
 
-  public async getRevokeTokens(): Promise<string[]> {
-    return (
-      await this.dbClient.token.findMany({
-        where: {
-          revoke: true,
-          NOT: [{ token: null }],
-        },
-        select: {
-          token: true,
-        },
-      })
-    ).map((t) => t.token) as string[];
+  public async getRevokeTokens(): Promise<{ token:string}[]> {
+    return (await this.dbClient.token.findMany({
+      orderBy: { createdAt: 'desc' },
+      where: { NOT: [{ token: null }, { revokedAt: null }] },
+      select: { token: true },
+    })) as { token: string }[];
   }
 }

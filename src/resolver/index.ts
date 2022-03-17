@@ -6,37 +6,37 @@ import jwt from 'jsonwebtoken';
 import { Resolvers } from '@schema/types.generated';
 import { CustomContext } from '@schema/types';
 
-function requireAuth(context: CustomContext) {
-  const { isSignin } = context;
+function throwIfNotSignedIn(context: CustomContext) {
+  const { tokenPayload } = context;
 
-  if (!isSignin) throw new AuthenticationError('sign-in to continue');
+  if (!tokenPayload) throw new AuthenticationError('sign-in to continue');
 }
 
 export const resolvers: Resolvers = {
   Query: {
     getReasons: (_, __, context) => {
-      requireAuth(context);
+      throwIfNotSignedIn(context);
 
       const { reasonDs } = context.dataSources;
       return reasonDs.getReasons();
     },
 
     getTransaction: (_, args, context) => {
-      requireAuth(context);
+      throwIfNotSignedIn(context);
 
       const { transactionDs } = context.dataSources;
       return transactionDs.getTransaction(args);
     },
 
     getTransactions: (_, args, context) => {
-      requireAuth(context);
+      throwIfNotSignedIn(context);
 
       const { transactionDs } = context.dataSources;
       return transactionDs.getTransactions(args);
     },
 
     getDailyBalance: (_, __, context) => {
-      requireAuth(context);
+      throwIfNotSignedIn(context);
 
       const { dailySpendDs } = context.dataSources;
       return dailySpendDs.read();
@@ -48,7 +48,7 @@ export const resolvers: Resolvers = {
      * Prisma will resolve the n+1 problem. Don't need DataLoader lib.
      */
     reason: async (trans, _, context) => {
-      requireAuth(context);
+      throwIfNotSignedIn(context);
 
       const { reasonDs } = context.dataSources;
       const reason = await reasonDs.getReasonById(trans.reasonId);
@@ -63,7 +63,7 @@ export const resolvers: Resolvers = {
 
   Mutation: {
     createTransaction: async (_, args, context) => {
-      requireAuth(context);
+      throwIfNotSignedIn(context);
 
       const { reasonDs, transactionDs } = context.dataSources;
 
@@ -85,7 +85,7 @@ export const resolvers: Resolvers = {
     },
 
     updateTransaction: async (_, args, context) => {
-      requireAuth(context);
+      throwIfNotSignedIn(context);
 
       const { reasonDs, transactionDs } = context.dataSources;
 
@@ -104,7 +104,7 @@ export const resolvers: Resolvers = {
     },
 
     deleteTransaction: async (_, args, context) => {
-      requireAuth(context);
+      throwIfNotSignedIn(context);
 
       const { transactionDs } = context.dataSources;
 
@@ -114,7 +114,7 @@ export const resolvers: Resolvers = {
     },
 
     createReason: (_, args, context) => {
-      requireAuth(context);
+      throwIfNotSignedIn(context);
 
       const { reasonDs } = context.dataSources;
 
@@ -122,7 +122,7 @@ export const resolvers: Resolvers = {
     },
 
     updateReason: (_, args, context) => {
-      requireAuth(context);
+      throwIfNotSignedIn(context);
 
       const { reasonDs } = context.dataSources;
 
