@@ -18,9 +18,9 @@ export type ConfigurationValues = {
       pass: string;
     };
   };
-  ssl_certificates?: {
-    key: string;
-    cert: string;
+  ssl_certificates: {
+    key?: string;
+    cert?: string;
   };
   environment: string;
   frontend_base_url: string;
@@ -42,8 +42,8 @@ class Config {
       LEDGER_BACKEND_APP_PORT = '3333',
       LEDGER_DATABASE_URL,
       LEDGER_FRONTEND_BASE_URL,
-      LEDGER_SSL_KEY = 'dev.key',
-      LEDGER_SSL_CERT = 'dev.crt',
+      LEDGER_SSL_KEY,
+      LEDGER_SSL_CERT,
       LEDGER_AUTHORIZED_EMAILS,
       LEDGER_SMTP_USER,
       LEDGER_SMTP_PASS,
@@ -65,10 +65,6 @@ class Config {
     this.throwIf(!LEDGER_SMTP_USER, 'smtp user is required');
     this.throwIf(!LEDGER_SMTP_PASS, 'smtp pass is required');
     this.throwIf(!LEDGER_SIGNIN_JWT_SECRET?.length, 'jwt secret is required');
-    this.throwIf(
-      NODE_ENV === 'production' && (!LEDGER_SSL_KEY || !LEDGER_SSL_CERT),
-      'ssl key/cert are required'
-    );
 
     this.configs = {
       app_port: Number(LEDGER_BACKEND_APP_PORT),
@@ -93,13 +89,10 @@ class Config {
           pass: LEDGER_SMTP_PASS as string,
         },
       },
-      ssl_certificates:
-        NODE_ENV === 'production'
-          ? {
-              key: LEDGER_SSL_KEY as string,
-              cert: LEDGER_SSL_CERT as string,
-            }
-          : undefined,
+      ssl_certificates: {
+        key: LEDGER_SSL_KEY,
+        cert: LEDGER_SSL_CERT,
+      },
       environment: NODE_ENV,
     };
   }

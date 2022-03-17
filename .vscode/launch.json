@@ -11,7 +11,6 @@
         "${workspaceFolder}/node_modules/tsconfig-paths/register"
       ],
       "protocol": "inspector",
-      "envFile": "${workspaceFolder}/.env",
       "args": ["./src/index.ts"],
       "skipFiles": ["<node_internals>/**"],
       "cwd": "${workspaceRoot}",

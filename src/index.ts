@@ -1,3 +1,10 @@
+
+/**
+ * Prisma will help to pour variables from .env to process.env
+ * In production, set env variables instead of using .env file
+ */
+import '@prisma/client';
+
 import { ApolloServer } from 'apollo-server-express';
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
 import express from 'express';
@@ -17,6 +24,7 @@ import { TokenDS } from '@datasource/token';
 import { GmailSmtp } from '@datasource/smtp';
 import Config from './config';
 
+
 async function initTokenCache(tokenDs: TokenDS) {
   const tokens = await tokenDs.getRevokeTokens();
   const cache = new LruCache<string, boolean>({ max: tokens.length });
@@ -27,7 +35,10 @@ async function initTokenCache(tokenDs: TokenDS) {
 }
 
 (async function startServer() {
-  const isProduction = Config.get('environment') === 'production';
+  const keyPath =Config.get('ssl_certificates')?.key;
+  const certPath= Config.get('ssl_certificates')?.cert;
+  const sslEnable = keyPath && certPath;
+
   const app = express();
 
   const tokenDs = new TokenDS(dbClient);
@@ -48,11 +59,11 @@ async function initTokenCache(tokenDs: TokenDS) {
 
   let httpServer;
 
-  if (isProduction) {
+  if (sslEnable) {
     httpServer = https.createServer(
       {
-        key: fs.readFileSync(Config.get('ssl_certificates')?.key as string),
-        cert: fs.readFileSync(Config.get('ssl_certificates')?.cert as string),
+        key: fs.readFileSync(keyPath),
+        cert: fs.readFileSync(certPath),
       },
       app
     );
@@ -104,7 +115,7 @@ async function initTokenCache(tokenDs: TokenDS) {
   );
 
   console.log(
-    `🚀 Server ready at http${isProduction ? 's' : ''}://localhost:${Config.get('app_port')}${
+    `🚀 Server ready at http${sslEnable ? 's' : ''}://localhost:${Config.get('app_port')}${
       server.graphqlPath
     }`
   );
