@@ -42,6 +42,33 @@ export class ReasonDS extends DataSource {
     });
   }
 
+  public getReasonsByTransactionId({
+    transactionId,
+  }: {
+    transactionId: number;
+  }): Promise<ReasonModel[]> {
+    return this.dbClient.reason.findMany({
+      orderBy: [
+        {
+          text: 'asc',
+        },
+      ],
+      select: {
+        id: true,
+        text: true,
+        updatedAt: true,
+        createdAt: true,
+      },
+      where: {
+        transactions: {
+          some: {
+            transactionId,
+          },
+        },
+      },
+    });
+  }
+
   public async getReasonById(id: number): Promise<ReasonModel | null> {
     return this.dbClient.reason.findFirst({
       where: {

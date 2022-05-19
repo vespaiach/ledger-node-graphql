@@ -73,7 +73,6 @@ async function createTransactions(reasons: { id: number }[], factor: number, loo
       amount: new Prisma.Decimal(factor * parseFloat(faker.finance.amount(1, 1000, 2))),
       date,
       note: faker.lorem.sentence(),
-      reasonId: reasons[reasonInd].id,
       updatedAt: date,
     });
   }

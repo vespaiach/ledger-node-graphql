@@ -1,15 +1,36 @@
 import { ApolloError, AuthenticationError } from 'apollo-server-errors';
-import { v4 as uuidv4 } from 'uuid';
-import * as emailValidator from 'email-validator';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
 import { Resolvers } from '@schema/types.generated';
-import { CustomContext } from '@schema/types';
+import { CustomContext, UserModel } from '@schema/types';
+import { Config } from 'src/config';
 
-function throwIfNotSignedIn(context: CustomContext) {
-  const { tokenPayload } = context;
+function throwIfNotSignedIn(context: CustomContext): { exp: Date; token: string; userId: number } {
+  const { tokenPayload, token } = context;
 
   if (!tokenPayload) throw new AuthenticationError('sign-in to continue');
+
+  return {
+    userId: parseInt(context.tokenPayload?.aud as string),
+    token,
+    exp: new Date((tokenPayload.exp as number) * 1000),
+  };
+}
+
+function issueToken({ user, appConfig }: { user: UserModel; appConfig: Config }): string {
+  const expiresIn =
+    Math.round(Date.now() / 1000) + appConfig.get('signin_token_available_time') * 60;
+
+  const token = jwt.sign(
+    { email: user.email, exp: expiresIn, aud: String(user.id) },
+    appConfig.get('signin_jwt_secret'),
+    {
+      algorithm: appConfig.get('signin_jwt_algorithm'),
+    }
+  );
+
+  return token;
 }
 
 export const resolvers: Resolvers = {
@@ -22,24 +43,17 @@ export const resolvers: Resolvers = {
     },
 
     getTransaction: (_, args, context) => {
-      throwIfNotSignedIn(context);
+      const { userId } = throwIfNotSignedIn(context);
 
       const { transactionDs } = context.dataSources;
-      return transactionDs.getTransaction(args);
+      return transactionDs.getTransaction(args, userId);
     },
 
     getTransactions: (_, args, context) => {
-      throwIfNotSignedIn(context);
+      const { userId } = throwIfNotSignedIn(context);
 
       const { transactionDs } = context.dataSources;
-      return transactionDs.getTransactions(args);
-    },
-
-    getDailyBalance: (_, __, context) => {
-      throwIfNotSignedIn(context);
-
-      const { dailySpendDs } = context.dataSources;
-      return dailySpendDs.read();
+      return transactionDs.getTransactions(args, userId);
     },
   },
 
@@ -47,157 +61,71 @@ export const resolvers: Resolvers = {
     /**
      * Prisma will resolve the n+1 problem. Don't need DataLoader lib.
      */
-    reason: async (trans, _, context) => {
+    reasons: async (trans, _, context) => {
       throwIfNotSignedIn(context);
 
       const { reasonDs } = context.dataSources;
-      const reason = await reasonDs.getReasonById(trans.reasonId);
+      const reasons = await reasonDs.getReasonsByTransactionId({ transactionId: trans.id });
 
-      if (!reason) {
-        throw new ApolloError(`Reason with ID = ${trans.reasonId} doesn't exist.`);
-      }
-
-      return reason;
+      return reasons;
     },
   },
 
   Mutation: {
     createTransaction: async (_, args, context) => {
-      throwIfNotSignedIn(context);
+      const { userId } = throwIfNotSignedIn(context);
+      const { transactionDs } = context.dataSources;
 
-      const { reasonDs, transactionDs } = context.dataSources;
-
-      const createdReason = await reasonDs.getReasonByText(args.reasonText);
-
-      if (createdReason) {
-        return transactionDs.createTransaction({ ...args, reasonId: createdReason.id });
-      }
-
-      const reason = await reasonDs.createReason({ text: args.reasonText }, [
-        { amount: args.amount, date: args.date, note: args.note },
-      ]);
-
-      if (!reason.transactions?.[0]) {
-        throw new ApolloError("Couldn't create transaction");
-      }
-
-      return reason.transactions[0];
+      return transactionDs.createTransaction(args, userId);
     },
 
     updateTransaction: async (_, args, context) => {
-      throwIfNotSignedIn(context);
+      const { userId } = throwIfNotSignedIn(context);
+      const { transactionDs } = context.dataSources;
 
-      const { reasonDs, transactionDs } = context.dataSources;
-
-      let reasonId: number | undefined = undefined;
-      if (args.reasonText) {
-        let reason = await reasonDs.getReasonByText(args.reasonText);
-
-        if (!reason) {
-          reason = await reasonDs.createReason({ text: args.reasonText });
-        }
-
-        reasonId = reason.id;
-      }
-
-      return transactionDs.updateTransaction({ ...args, reasonId });
+      return transactionDs.updateTransaction(args, userId);
     },
 
     deleteTransaction: async (_, args, context) => {
-      throwIfNotSignedIn(context);
+      const { userId } = throwIfNotSignedIn(context);
 
       const { transactionDs } = context.dataSources;
 
-      await transactionDs.deleteTransaction(args);
+      await transactionDs.deleteTransaction(args, userId);
 
       return true;
     },
 
-    createReason: (_, args, context) => {
-      throwIfNotSignedIn(context);
+    createUser: async (_, args, context) => {
+      const { userDs } = context.dataSources;
 
-      const { reasonDs } = context.dataSources;
-
-      return reasonDs.createReason(args);
+      return await userDs.create({ ...args, password: bcrypt.hashSync(args.password, 10) });
     },
 
-    updateReason: (_, args, context) => {
-      throwIfNotSignedIn(context);
+    updateUser: async (_, args, context) => {
+      const { userId } = throwIfNotSignedIn(context);
+      const { userDs } = context.dataSources;
 
-      const { reasonDs } = context.dataSources;
-
-      return reasonDs.updateReason(args);
+      return await userDs.update({ ...args, id: userId });
     },
 
-    signin: async (_, { email }, context) => {
-      if (!emailValidator.validate(email)) return 'invalid email address';
-
+    signin: async (_, { username, password }, context) => {
       const { appConfig } = context;
-      const { tokenDs, smtpDs } = context.dataSources;
+      const { userDs } = context.dataSources;
 
-      /**
-       * Check if email address is allowed to sign in.
-       * Config in: LEDGER_LOGIN
-       */
-      if (
-        appConfig.get('authorized_emails')?.length &&
-        !appConfig.get('authorized_emails')?.includes(email)
-      ) {
-        return "the email address isn't allowed to sign in";
+      const user = await userDs.getUserByUsername({ username });
+      if (user && (await bcrypt.compare(password, user.password))) {
+        return issueToken({ user, appConfig });
       }
 
-      /**
-       * Stop users from spamming emails too much.
-       */
-      const lastSeen = new Date();
-      lastSeen.setMinutes(lastSeen.getMinutes() - appConfig.get('signin_key_available_time'));
-      const record = await tokenDs.getLatestActiveRecord({ email, lastSeen });
-      if (record !== null)
-        return 'an instruction has been sent to the email address, please follow that email to sign in.';
-
-      const key = uuidv4();
-
-      await Promise.all([tokenDs.create({ key, email }), smtpDs.send(email, key)]);
-
-      return 'sent';
-    },
-
-    token: async (_, { key }, context) => {
-      const { appConfig } = context;
-      const { tokenDs } = context.dataSources;
-
-      const record = await tokenDs.getRecordByKey({ key });
-
-      const expire = new Date();
-      expire.setMinutes(expire.getMinutes() - appConfig.get('signin_key_available_time'));
-
-      if (!record || record.createdAt <= expire) {
-        throw new ApolloError("Sign in key didn't exist or expired.");
-      }
-
-      const expiresIn =
-        Math.round(Date.now() / 1000) + appConfig.get('signin_token_available_time') * 60;
-
-      const token = jwt.sign(
-        { email: record.email, exp: expiresIn },
-        appConfig.get('signin_jwt_secret'),
-        {
-          algorithm: appConfig.get('signin_jwt_algorithm'),
-        }
-      );
-
-      await tokenDs.update({ token, key });
-
-      return token;
+      throw new ApolloError(`Username or password was not correct!`);
     },
 
     signout: async (_, __, context) => {
-      const { token } = context;
+      const { token, exp } = throwIfNotSignedIn(context);
       const { tokenDs } = context.dataSources;
 
-      if (token) {
-        await tokenDs.revoke({ token });
-      }
+      await tokenDs.revoke({ token, exp });
     },
   },
 };

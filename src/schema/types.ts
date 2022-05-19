@@ -4,6 +4,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { ReasonDS } from 'src/datasource/reason';
 import { TransactionDS } from 'src/datasource/transaction';
 import { UserDS } from '@datasource/user';
+import { TokenDS } from '@datasource/token';
 import Config from 'src/config';
 
 export interface CacheValue {
@@ -21,6 +22,7 @@ export interface CustomContext {
     reasonDs: ReasonDS;
     transactionDs: TransactionDS;
     userDs: UserDS;
+    tokenDs: TokenDS;
   };
 }
 

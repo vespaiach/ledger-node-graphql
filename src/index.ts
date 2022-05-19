@@ -18,7 +18,6 @@ import { resolvers } from '@resolver';
 import { dbClient } from '@db';
 import { TransactionDS } from '@datasource/transaction';
 import { TokenDS } from '@datasource/token';
-import { GmailSmtp } from '@datasource/smtp';
 import Config from './config';
 
 (async function startServer() {
@@ -52,11 +51,6 @@ import Config from './config';
       tokenDs,
       reasonDs: new ReasonDS(dbClient),
       transactionDs: new TransactionDS(dbClient),
-      smtpDs: new GmailSmtp(
-        Config.get('smtp_credentials'),
-        Config.get('signin_email_template'),
-        Config.get('frontend_base_url')
-      ),
     }),
 
     context: async ({ req }) => {
