@@ -8,10 +8,12 @@ generator client {
 }
 
 model Reason {
-  id           Int           @id @default(autoincrement())
-  text         String        @unique @db.VarChar(255)
-  updatedAt    DateTime      @default(now()) @map("updated_at")
-  transactions Transaction[]
+  id        Int      @id @default(autoincrement())
+  text      String   @unique @db.VarChar(255)
+  updatedAt DateTime @default(now()) @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  transactions TransactionsReasons[]
 
   @@map("reasons")
 }
@@ -22,26 +24,49 @@ model Transaction {
   date      DateTime @db.Date
   note      String?  @db.VarChar(511)
   updatedAt DateTime @default(now()) @map("updated_at")
-  reason    Reason   @relation(fields: [reasonId], references: [id], onDelete: Cascade)
-  reasonId  Int      @map("reason_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  reasons TransactionsReasons[]
+  User    User[]
 
   @@map("transactions")
 }
 
-model DailySpend {
-  date     String  @id @db.VarChar(27)
-  spending Decimal @db.Decimal(15, 2)
-  earning  Decimal @db.Decimal(15, 2)
+model TransactionsReasons {
+  transactionId Int         @map("transaction_id")
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  reasonId      Int         @map("reason_id")
+  reason        Reason      @relation(fields: [reasonId], references: [id])
+  updatedAt     DateTime    @default(now()) @map("updated_at")
 
-  @@map("daily_spends")
+
+  @@id([reasonId, transactionId])
+  @@map("transactions_reasons")
 }
 
-model Token {
-  key       String    @id @db.VarChar(36)
-  email     String    @db.VarChar(128)
-  token     String?   @unique
-  createdAt DateTime  @default(now()) @map("created_at")
-  revokedAt DateTime? @map("revoked_at")
+model User {
+  id        Int      @id @default(autoincrement())
+  firstName String?  @map("first_name") @db.VarChar(63)
+  lastName  String?  @map("last_name") @db.VarChar(63)
+  username  String   @unique @db.VarChar(127)
+  email     String   @unique @db.VarChar(127)
+  password  String   @unique @db.VarChar(127)
+  isActive  Boolean  @default(true) @map("is_active")
+  updatedAt DateTime @default(now()) @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  @@map("token")
+  transactions  Transaction @relation(fields: [transactionId], references: [id])
+  transactionId Int         @map("transaction_id")
+
+  @@map("user")
+}
+
+model RevokedToken {
+  token String   @id @db.VarChar(2023)
+  exp   DateTime
+
+  updatedAt DateTime @default(now()) @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  @@map("revoked_token")
 }
