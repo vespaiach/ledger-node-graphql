@@ -1,10 +1,11 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { ReasonModel, TransactionModel, DailyBalanceModel, CustomContext } from './types';
+import { ReasonModel, TransactionModel, CustomContext } from './types';
 export type Maybe<T> = T | null | undefined;
 export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -17,29 +18,15 @@ export type Scalars = {
   Void: void;
 };
 
-export type DailyBalance = {
-  __typename?: 'DailyBalance';
-  date: Scalars['String'];
-  earning: Scalars['Float'];
-  spending: Scalars['Float'];
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
-  createReason?: Maybe<Reason>;
   createTransaction?: Maybe<Transaction>;
-  deleteReason?: Maybe<Scalars['Boolean']>;
+  createUser?: Maybe<User>;
   deleteTransaction?: Maybe<Scalars['Boolean']>;
   signin: Scalars['String'];
   signout?: Maybe<Scalars['Void']>;
-  token: Scalars['String'];
-  updateReason?: Maybe<Reason>;
   updateTransaction?: Maybe<Transaction>;
-};
-
-
-export type MutationCreateReasonArgs = {
-  text: Scalars['String'];
+  updateUser?: Maybe<User>;
 };
 
 
@@ -47,12 +34,16 @@ export type MutationCreateTransactionArgs = {
   amount: Scalars['Float'];
   date: Scalars['Date'];
   note?: InputMaybe<Scalars['String']>;
-  reasonText: Scalars['String'];
+  reasons: Array<Scalars['String']>;
 };
 
 
-export type MutationDeleteReasonArgs = {
-  id: Scalars['Int'];
+export type MutationCreateUserArgs = {
+  email: Scalars['String'];
+  firstName?: InputMaybe<Scalars['String']>;
+  lastName?: InputMaybe<Scalars['String']>;
+  password: Scalars['String'];
+  username: Scalars['String'];
 };
 
 
@@ -62,18 +53,8 @@ export type MutationDeleteTransactionArgs = {
 
 
 export type MutationSigninArgs = {
-  email: Scalars['String'];
-};
-
-
-export type MutationTokenArgs = {
-  key: Scalars['String'];
-};
-
-
-export type MutationUpdateReasonArgs = {
-  id: Scalars['Int'];
-  text: Scalars['String'];
+  password: Scalars['String'];
+  username: Scalars['String'];
 };
 
 
@@ -82,12 +63,21 @@ export type MutationUpdateTransactionArgs = {
   date?: InputMaybe<Scalars['Date']>;
   id: Scalars['Int'];
   note?: InputMaybe<Scalars['String']>;
-  reasonText?: InputMaybe<Scalars['String']>;
+  reasons?: InputMaybe<Array<Scalars['String']>>;
+};
+
+
+export type MutationUpdateUserArgs = {
+  email?: InputMaybe<Scalars['String']>;
+  firstName?: InputMaybe<Scalars['String']>;
+  isActive?: InputMaybe<Scalars['Boolean']>;
+  lastName?: InputMaybe<Scalars['String']>;
+  password?: InputMaybe<Scalars['String']>;
+  username?: InputMaybe<Scalars['String']>;
 };
 
 export type Query = {
   __typename?: 'Query';
-  getDailyBalance: Array<DailyBalance>;
   getReasons?: Maybe<Array<Reason>>;
   getTransaction?: Maybe<Transaction>;
   getTransactions?: Maybe<Array<Transaction>>;
@@ -102,8 +92,8 @@ export type QueryGetTransactionArgs = {
 export type QueryGetTransactionsArgs = {
   fromAmount?: InputMaybe<Scalars['Int']>;
   fromDate?: InputMaybe<Scalars['Date']>;
-  lastCursor?: InputMaybe<Scalars['Int']>;
-  reasonIds?: InputMaybe<Array<Scalars['Int']>>;
+  reasons?: InputMaybe<Array<Scalars['String']>>;
+  skip?: InputMaybe<Scalars['Int']>;
   take?: InputMaybe<Scalars['Int']>;
   toAmount?: InputMaybe<Scalars['Int']>;
   toDate?: InputMaybe<Scalars['Date']>;
@@ -113,6 +103,7 @@ export type Reason = {
   __typename?: 'Reason';
   id: Scalars['Int'];
   text: Scalars['String'];
+  transactions?: Maybe<Array<Transaction>>;
   updatedAt: Scalars['Date'];
 };
 
@@ -122,8 +113,28 @@ export type Transaction = {
   date: Scalars['Date'];
   id: Scalars['Int'];
   note?: Maybe<Scalars['String']>;
-  reason: Reason;
+  reasons: Array<Reason>;
   updatedAt: Scalars['Date'];
+};
+
+export type TransactionsReasons = {
+  __typename?: 'TransactionsReasons';
+  reason: Reason;
+  reasonId: Scalars['Int'];
+  transaction: Transaction;
+  transactionId: Scalars['Int'];
+  updatedAt: Scalars['Date'];
+};
+
+export type User = {
+  __typename?: 'User';
+  email: Scalars['String'];
+  firstName?: Maybe<Scalars['String']>;
+  id: Scalars['Int'];
+  isActive: Scalars['Boolean'];
+  lastName?: Maybe<Scalars['String']>;
+  updatedAt: Scalars['Date'];
+  username: Scalars['String'];
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -197,7 +208,6 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
-  DailyBalance: ResolverTypeWrapper<DailyBalanceModel>;
   Date: ResolverTypeWrapper<Scalars['Date']>;
   Float: ResolverTypeWrapper<Scalars['Float']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
@@ -206,13 +216,14 @@ export type ResolversTypes = ResolversObject<{
   Reason: ResolverTypeWrapper<ReasonModel>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Transaction: ResolverTypeWrapper<TransactionModel>;
+  TransactionsReasons: ResolverTypeWrapper<Omit<TransactionsReasons, 'reason' | 'transaction'> & { reason: ResolversTypes['Reason'], transaction: ResolversTypes['Transaction'] }>;
+  User: ResolverTypeWrapper<User>;
   Void: ResolverTypeWrapper<Scalars['Void']>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean'];
-  DailyBalance: DailyBalanceModel;
   Date: Scalars['Date'];
   Float: Scalars['Float'];
   Int: Scalars['Int'];
@@ -221,14 +232,9 @@ export type ResolversParentTypes = ResolversObject<{
   Reason: ReasonModel;
   String: Scalars['String'];
   Transaction: TransactionModel;
+  TransactionsReasons: Omit<TransactionsReasons, 'reason' | 'transaction'> & { reason: ResolversParentTypes['Reason'], transaction: ResolversParentTypes['Transaction'] };
+  User: User;
   Void: Scalars['Void'];
-}>;
-
-export type DailyBalanceResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['DailyBalance'] = ResolversParentTypes['DailyBalance']> = ResolversObject<{
-  date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  earning?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  spending?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
@@ -236,27 +242,25 @@ export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type MutationResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  createReason?: Resolver<Maybe<ResolversTypes['Reason']>, ParentType, ContextType, RequireFields<MutationCreateReasonArgs, 'text'>>;
-  createTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<MutationCreateTransactionArgs, 'amount' | 'date' | 'reasonText'>>;
-  deleteReason?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteReasonArgs, 'id'>>;
+  createTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<MutationCreateTransactionArgs, 'amount' | 'date' | 'reasons'>>;
+  createUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'email' | 'password' | 'username'>>;
   deleteTransaction?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationDeleteTransactionArgs, 'id'>>;
-  signin?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationSigninArgs, 'email'>>;
+  signin?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationSigninArgs, 'password' | 'username'>>;
   signout?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
-  token?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationTokenArgs, 'key'>>;
-  updateReason?: Resolver<Maybe<ResolversTypes['Reason']>, ParentType, ContextType, RequireFields<MutationUpdateReasonArgs, 'id' | 'text'>>;
   updateTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<MutationUpdateTransactionArgs, 'id'>>;
+  updateUser?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<MutationUpdateUserArgs, never>>;
 }>;
 
 export type QueryResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
-  getDailyBalance?: Resolver<Array<ResolversTypes['DailyBalance']>, ParentType, ContextType>;
   getReasons?: Resolver<Maybe<Array<ResolversTypes['Reason']>>, ParentType, ContextType>;
   getTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<QueryGetTransactionArgs, 'id'>>;
-  getTransactions?: Resolver<Maybe<Array<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryGetTransactionsArgs, 'take'>>;
+  getTransactions?: Resolver<Maybe<Array<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryGetTransactionsArgs, 'skip' | 'take'>>;
 }>;
 
 export type ReasonResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Reason'] = ResolversParentTypes['Reason']> = ResolversObject<{
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   text?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  transactions?: Resolver<Maybe<Array<ResolversTypes['Transaction']>>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -266,8 +270,28 @@ export type TransactionResolvers<ContextType = CustomContext, ParentType extends
   date?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   note?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  reason?: Resolver<ResolversTypes['Reason'], ParentType, ContextType>;
+  reasons?: Resolver<Array<ResolversTypes['Reason']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type TransactionsReasonsResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['TransactionsReasons'] = ResolversParentTypes['TransactionsReasons']> = ResolversObject<{
+  reason?: Resolver<ResolversTypes['Reason'], ParentType, ContextType>;
+  reasonId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  transaction?: Resolver<ResolversTypes['Transaction'], ParentType, ContextType>;
+  transactionId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type UserResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = ResolversObject<{
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  username?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -276,12 +300,13 @@ export interface VoidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type Resolvers<ContextType = CustomContext> = ResolversObject<{
-  DailyBalance?: DailyBalanceResolvers<ContextType>;
   Date?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Reason?: ReasonResolvers<ContextType>;
   Transaction?: TransactionResolvers<ContextType>;
+  TransactionsReasons?: TransactionsReasonsResolvers<ContextType>;
+  User?: UserResolvers<ContextType>;
   Void?: GraphQLScalarType;
 }>;
 

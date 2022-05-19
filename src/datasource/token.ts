@@ -1,5 +1,5 @@
 import { DataSource } from 'apollo-datasource';
-import { PrismaClient, Token } from '@prisma/client';
+import { PrismaClient, RevokedToken } from '@prisma/client';
 
 export class TokenDS extends DataSource {
   dbClient: PrismaClient;
@@ -9,78 +9,35 @@ export class TokenDS extends DataSource {
     this.dbClient = dbClient;
   }
 
-  public async getRecordByKey({ key }: { key: string }): Promise<Token | null> {
-    return this.dbClient.token.findFirst({
-      where: { key },
-    });
-  }
-
-  public async getRecordByToken({ token }: { token: string }): Promise<Token | null> {
-    return this.dbClient.token.findFirst({
-      where: { token },
-    });
-  }
-
-  public async getLatestActiveRecord({
-    email,
-    lastSeen,
-  }: {
-    email: string;
-    lastSeen: Date;
-  }): Promise<Token | null> {
-    console.log(email, lastSeen);
-    return this.dbClient.token.findFirst({
-      orderBy: {
-        createdAt: 'desc',
-      },
-      where: {
-        email,
-        token: null,
-        createdAt: {
-          gt: lastSeen,
-        },
-      },
-    });
-  }
-
-  public async create({ email, key }: { key: string; email: string }): Promise<void> {
-    await this.dbClient.token.create({
+  public async revoke({ token, exp }: { exp: Date; token: string }): Promise<RevokedToken> {
+    return this.dbClient.revokedToken.create({
       data: {
-        email,
-        key,
-        createdAt: new Date(),
+        token,
+        exp,
       },
     });
   }
 
-  public async revoke({ token }: { token: string }): Promise<void> {
-    await this.dbClient.token.update({
+  public async isRevoke({ token }: { token: string }): Promise<boolean> {
+    const tokenObj = await this.dbClient.revokedToken.findFirst({
       where: {
         token,
       },
-      data: {
-        revokedAt: new Date(),
-      },
     });
+
+    return tokenObj === null;
   }
 
-  public async update(args: { revokedAt?: Date; key: string; token?: string }): Promise<void> {
-    await this.dbClient.token.update({
+  /**
+   * Delete records those have exp time in the past.
+   */
+  public async cleanUp(): Promise<void> {
+    this.dbClient.revokedToken.deleteMany({
       where: {
-        key: args.key,
-      },
-      data: {
-        token: args.token ? args.token : undefined,
-        revokedAt: args.revokedAt ? args.revokedAt : undefined,
+        exp: {
+          lt: new Date(),
+        },
       },
     });
-  }
-
-  public async getRevokeTokens(): Promise<{ token:string}[]> {
-    return (await this.dbClient.token.findMany({
-      orderBy: { createdAt: 'desc' },
-      where: { NOT: [{ token: null }, { revokedAt: null }] },
-      select: { token: true },
-    })) as { token: string }[];
   }
 }

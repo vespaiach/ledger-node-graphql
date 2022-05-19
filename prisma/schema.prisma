@@ -27,7 +27,8 @@ model Transaction {
   createdAt DateTime @default(now()) @map("created_at")
 
   reasons TransactionsReasons[]
-  User    User[]
+  user    User                  @relation(fields: [userId], references: [id])
+  userId  Int                   @map("user_id")
 
   @@map("transactions")
 }
@@ -50,13 +51,12 @@ model User {
   lastName  String?  @map("last_name") @db.VarChar(63)
   username  String   @unique @db.VarChar(127)
   email     String   @unique @db.VarChar(127)
-  password  String   @unique @db.VarChar(127)
+  password  String   @db.VarChar(255)
   isActive  Boolean  @default(true) @map("is_active")
   updatedAt DateTime @default(now()) @map("updated_at")
   createdAt DateTime @default(now()) @map("created_at")
 
-  transactions  Transaction @relation(fields: [transactionId], references: [id])
-  transactionId Int         @map("transaction_id")
+  transactions Transaction[]
 
   @@map("user")
 }
@@ -67,6 +67,6 @@ model RevokedToken {
 
   updatedAt DateTime @default(now()) @map("updated_at")
   createdAt DateTime @default(now()) @map("created_at")
-  
+
   @@map("revoked_token")
 }

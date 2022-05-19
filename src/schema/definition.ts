@@ -1,6 +1,16 @@
-const typeDefs = /* GraphQL */`
+const typeDefs = /* GraphQL */ `
   scalar Date
   scalar Void
+
+  type User {
+    id: Int!
+    firstName: String
+    lastName: String
+    username: String!
+    email: String!
+    isActive: Boolean!
+    updatedAt: Date!
+  }
 
   type Transaction {
     id: Int!
@@ -8,19 +18,22 @@ const typeDefs = /* GraphQL */`
     date: Date!
     note: String
     updatedAt: Date!
-    reason: Reason!
+    reasons: [Reason!]!
   }
 
   type Reason {
     id: Int!
     text: String!
     updatedAt: Date!
+    transactions: [Transaction!]
   }
 
-  type DailyBalance {
-    date: String!
-    earning: Float!
-    spending: Float!
+  type TransactionsReasons {
+    reasonId: Int!
+    reason: Reason!
+    transactionId: Int!
+    transaction: Transaction!
+    updatedAt: Date!
   }
 
   type Query {
@@ -31,27 +44,41 @@ const typeDefs = /* GraphQL */`
       toDate: Date
       fromAmount: Int
       toAmount: Int
-      reasonIds: [Int!]
-      lastCursor: Int
+      reasons: [String!]
       take: Int = 50
+      skip: Int = 0
     ): [Transaction!]
-    getDailyBalance: [DailyBalance!]! 
   }
 
   type Mutation {
-    createReason(text: String!): Reason
-    updateReason(id: Int!, text: String!): Reason
-    deleteReason(id: Int!): Boolean
-
-    createTransaction(date: Date!, amount: Float!, reasonText: String!, note: String): Transaction
-    updateTransaction(id: Int!, date: Date, amount: Float, reasonText: String, note: String): Transaction
+    createUser(
+      username: String!
+      email: String!
+      password: String!
+      firstName: String
+      lastName: String
+    ): User
+    updateUser(
+      username: String
+      email: String
+      password: String
+      firstName: String
+      lastName: String
+      isActive: Boolean
+    ): User
+    createTransaction(date: Date!, amount: Float!, reasons: [String!]!, note: String): Transaction
+    updateTransaction(
+      id: Int!
+      date: Date
+      amount: Float
+      reasons: [String!]
+      note: String
+    ): Transaction
     deleteTransaction(id: Int!): Boolean
 
-    signin(email: String!): String!
-    token(key: String!): String!
+    signin(username: String!, password: String!): String!
     signout: Void
   }
-
 `;
 
 export { typeDefs };

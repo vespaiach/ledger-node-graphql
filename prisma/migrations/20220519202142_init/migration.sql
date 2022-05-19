@@ -16,6 +16,7 @@ CREATE TABLE "transactions" (
     "note" VARCHAR(511),
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "user_id" INTEGER NOT NULL,
 
     CONSTRAINT "transactions_pkey" PRIMARY KEY ("id")
 );
@@ -36,11 +37,10 @@ CREATE TABLE "user" (
     "last_name" VARCHAR(63),
     "username" VARCHAR(127) NOT NULL,
     "email" VARCHAR(127) NOT NULL,
-    "password" VARCHAR(127) NOT NULL,
+    "password" VARCHAR(255) NOT NULL,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "transaction_id" INTEGER NOT NULL,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -64,14 +64,11 @@ CREATE UNIQUE INDEX "user_username_key" ON "user"("username");
 -- CreateIndex
 CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
--- CreateIndex
-CREATE UNIQUE INDEX "user_password_key" ON "user"("password");
+-- AddForeignKey
+ALTER TABLE "transactions" ADD CONSTRAINT "transactions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "transactions_reasons" ADD CONSTRAINT "transactions_reasons_reason_id_fkey" FOREIGN KEY ("reason_id") REFERENCES "reasons"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "transactions_reasons" ADD CONSTRAINT "transactions_reasons_transaction_id_fkey" FOREIGN KEY ("transaction_id") REFERENCES "transactions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "user" ADD CONSTRAINT "user_transaction_id_fkey" FOREIGN KEY ("transaction_id") REFERENCES "transactions"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

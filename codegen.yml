@@ -15,4 +15,3 @@ generates:
       mappers:
         Reason: ./types#ReasonModel
         Transaction: ./types#TransactionModel
-        DailyBalance: ./types#DailyBalanceModel
