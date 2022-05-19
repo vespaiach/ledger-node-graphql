@@ -1,4 +1,3 @@
-
 /**
  * Prisma will help to pour variables from .env to process.env
  * In production, set env variables instead of using .env file
@@ -12,50 +11,24 @@ import https from 'https';
 import http from 'http';
 import fs from 'fs';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import LruCache from 'lru-cache';
 
 import { typeDefs } from '@schema/definition';
 import { ReasonDS } from '@datasource/reason';
 import { resolvers } from '@resolver';
 import { dbClient } from '@db';
 import { TransactionDS } from '@datasource/transaction';
-import { DailySpendDS } from '@datasource/dailySpend';
 import { TokenDS } from '@datasource/token';
 import { GmailSmtp } from '@datasource/smtp';
 import Config from './config';
 
-
-async function initTokenCache(tokenDs: TokenDS) {
-  const tokens = await tokenDs.getRevokeTokens();
-  const cache = new LruCache<string, boolean>({ max: tokens.length });
-
-  tokens.forEach((t) => void cache.set(t.token, true));
-
-  return cache;
-}
-
 (async function startServer() {
-  const keyPath =Config.get('ssl_certificates')?.key;
-  const certPath= Config.get('ssl_certificates')?.cert;
+  const keyPath = Config.get('ssl_certificates')?.key;
+  const certPath = Config.get('ssl_certificates')?.cert;
   const sslEnable = keyPath && certPath;
 
   const app = express();
 
   const tokenDs = new TokenDS(dbClient);
-  const revokedTokensCache = await initTokenCache(tokenDs);
-
-  async function hasBeenRevoked(token: string) {
-    if (!revokedTokensCache.has(token)) {
-      const tokenRecord = await tokenDs.getRecordByToken({ token });
-
-      if (tokenRecord?.revokedAt) {
-        revokedTokensCache.set(token, true);
-        return true;
-      }
-      return false;
-    }
-    return true;
-  }
 
   let httpServer;
 
@@ -79,7 +52,6 @@ async function initTokenCache(tokenDs: TokenDS) {
       tokenDs,
       reasonDs: new ReasonDS(dbClient),
       transactionDs: new TransactionDS(dbClient),
-      dailySpendDs: new DailySpendDS(dbClient),
       smtpDs: new GmailSmtp(
         Config.get('smtp_credentials'),
         Config.get('signin_email_template'),
@@ -93,7 +65,7 @@ async function initTokenCache(tokenDs: TokenDS) {
       let tokenPayload: JwtPayload | null = null;
 
       try {
-        if (!(await hasBeenRevoked(token))) {
+        if (!(await tokenDs.isRevoke({ token }))) {
           tokenPayload = token
             ? (jwt.verify(token, Config.get('signin_jwt_secret')) as JwtPayload)
             : null;
