@@ -22,7 +22,9 @@ export class Config {
 
   constructor() {
     const {
-      LEDGER_BACKEND_APP_PORT = '3333',
+      // Heroku expose the $PORT env var, and we have to bind to this port instead.
+      // So when deploying to heroku, don't set this env variable.
+      LEDGER_BACKEND_APP_PORT = process.env.PORT || '3333',
       LEDGER_DATABASE_URL,
       LEDGER_SSL_KEY,
       LEDGER_SSL_CERT,
