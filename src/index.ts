@@ -11,6 +11,9 @@ import https from 'https';
 import http from 'http';
 import fs from 'fs';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { constraintDirective, constraintDirectiveTypeDefs } from 'graphql-constraint-directive';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { DateTimeTypeDefinition, VoidTypeDefinition } from 'graphql-scalars';
 
 import { typeDefs } from '@schema/definition';
 import { ReasonDS } from '@datasource/reason';
@@ -25,10 +28,15 @@ import { UserDS } from '@datasource/user';
   const keyPath = Config.get('ssl_certificates')?.key;
   const certPath = Config.get('ssl_certificates')?.cert;
   const sslEnable = keyPath && certPath;
-
   const app = express();
-
   const tokenDs = new TokenDS(dbClient);
+
+  const schema = constraintDirective()(
+    makeExecutableSchema({
+      typeDefs: [DateTimeTypeDefinition, VoidTypeDefinition, constraintDirectiveTypeDefs, typeDefs],
+      resolvers,
+    })
+  );
 
   let httpServer;
 
@@ -45,8 +53,7 @@ import { UserDS } from '@datasource/user';
   }
 
   const server = new ApolloServer({
-    typeDefs,
-    resolvers,
+    schema,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     dataSources: () => ({
       tokenDs,

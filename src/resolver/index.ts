@@ -1,10 +1,10 @@
 import { ApolloError, AuthenticationError } from 'apollo-server-errors';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 
 import { Resolvers } from '@schema/types.generated';
 import { CustomContext, UserModel } from '@schema/types';
 import { Config } from 'src/config';
+import { comparePassword, hashPassword } from 'src/util/hash';
 
 function throwIfNotSignedIn(context: CustomContext): { exp: Date; token: string; userId: number } {
   const { tokenPayload, token } = context;
@@ -99,14 +99,16 @@ export const resolvers: Resolvers = {
     createUser: async (_, args, context) => {
       const { userDs } = context.dataSources;
 
-      return await userDs.create({ ...args, password: bcrypt.hashSync(args.password, 10) });
+      return await userDs.create({ ...args, password: hashPassword(args.password) });
     },
 
     updateUser: async (_, args, context) => {
       const { userId } = throwIfNotSignedIn(context);
       const { userDs } = context.dataSources;
 
-      return await userDs.update({ ...args, id: userId });
+      const password = args.password ? hashPassword(args.password) : undefined;
+
+      return await userDs.update({ ...args, password, id: userId });
     },
 
     signin: async (_, { username, password }, context) => {
@@ -114,7 +116,7 @@ export const resolvers: Resolvers = {
       const { userDs } = context.dataSources;
 
       const user = await userDs.getUserByUsername({ username });
-      if (user && (await bcrypt.compare(password, user.password))) {
+      if (user && (await comparePassword(password, user.password)) && user.isActive) {
         return issueToken({ user, appConfig });
       }
 

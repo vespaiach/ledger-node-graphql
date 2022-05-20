@@ -1,5 +1,5 @@
 const typeDefs = /* GraphQL */ `
-  scalar Date
+  scalar DateTime
   scalar Void
 
   type User {
@@ -9,22 +9,22 @@ const typeDefs = /* GraphQL */ `
     username: String!
     email: String!
     isActive: Boolean!
-    updatedAt: Date!
+    updatedAt: DateTime!
   }
 
   type Transaction {
     id: Int!
     amount: Float!
-    date: Date!
+    date: DateTime!
     note: String
-    updatedAt: Date!
+    updatedAt: DateTime!
     reasons: [Reason!]!
   }
 
   type Reason {
     id: Int!
     text: String!
-    updatedAt: Date!
+    updatedAt: DateTime!
     transactions: [Transaction!]
   }
 
@@ -33,15 +33,15 @@ const typeDefs = /* GraphQL */ `
     reason: Reason!
     transactionId: Int!
     transaction: Transaction!
-    updatedAt: Date!
+    updatedAt: DateTime!
   }
 
   type Query {
     getReasons: [Reason!]
     getTransaction(id: Int!): Transaction
     getTransactions(
-      fromDate: Date
-      toDate: Date
+      fromDate: DateTime 
+      toDate: DateTime 
       fromAmount: Int
       toAmount: Int
       reasons: [String!]
@@ -52,31 +52,39 @@ const typeDefs = /* GraphQL */ `
 
   type Mutation {
     createUser(
-      username: String!
-      email: String!
-      password: String!
-      firstName: String
-      lastName: String
+      username: String! @constraint(pattern: "^[0-9a-zA-Z_]*$", minLength: 3, maxLength: 127)
+      email: String! @constraint(minLength: 8, format: "email", maxLength: 255)
+      password: String! @constraint(minLength: 5, maxLength: 127)
+      firstName: String @constraint(maxLength: 127)
+      lastName: String @constraint(maxLength: 127)
     ): User
     updateUser(
-      username: String
-      email: String
-      password: String
+      username: String @constraint(pattern: "^[0-9a-zA-Z_]*$", minLength: 3, maxLength: 127)
+      email: String @constraint(minLength: 8, format: "email", maxLength: 255)
+      password: String @constraint(minLength: 5, maxLength: 127)
       firstName: String
       lastName: String
       isActive: Boolean
     ): User
-    createTransaction(date: Date!, amount: Float!, reasons: [String!]!, note: String): Transaction
+    createTransaction(
+      date: DateTime!
+      amount: Float!
+      reasons: [String!]!
+      note: String
+    ): Transaction
     updateTransaction(
       id: Int!
-      date: Date
+      date: DateTime
       amount: Float
       reasons: [String!]
       note: String
     ): Transaction
     deleteTransaction(id: Int!): Boolean
 
-    signin(username: String!, password: String!): String!
+    signin(
+      username: String! @constraint(pattern: "^[0-9a-zA-Z_]*$", minLength: 3, maxLength: 127)
+      password: String! @constraint(minLength: 5, maxLength: 127)
+    ): String!
     signout: Void
   }
 `;

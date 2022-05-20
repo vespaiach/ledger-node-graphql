@@ -7,6 +7,7 @@
   "license": "MIT",
   "dependencies": {
     "@faker-js/faker": "^6.0.0-beta.0",
+    "@graphql-tools/schema": "^8.3.12",
     "@prisma/client": "^3.14.0",
     "@types/node": "^17.0.13",
     "apollo-datasource": "^3.1.0",
@@ -17,6 +18,8 @@
     "email-validator": "^2.0.4",
     "express": "^4.17.2",
     "graphql": "^16.5.0",
+    "graphql-constraint-directive": "^3.1.0",
+    "graphql-scalars": "^1.17.0",
     "jsonwebtoken": "^8.5.1",
     "lru-cache": "^7.10.1",
     "nodemailer": "^6.7.2",
@@ -36,7 +39,7 @@
     "migrate": "prisma migrate dev"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^2.4.0",
+    "@graphql-codegen/cli": "^2.6.2",
     "@graphql-codegen/typescript": "^2.4.2",
     "@graphql-codegen/typescript-resolvers": "^2.4.3",
     "@types/lru-cache": "^7.4.0",
