@@ -1,5 +1,6 @@
 import { ApolloError, AuthenticationError } from 'apollo-server-errors';
 import jwt from 'jsonwebtoken';
+import { VoidResolver, DateTimeResolver, NonEmptyStringResolver, EmailAddressResolver } from 'graphql-scalars';
 
 import { Resolvers } from '@schema/types.generated';
 import { CustomContext, UserModel } from '@schema/types';
@@ -34,6 +35,11 @@ function issueToken({ user, appConfig }: { user: UserModel; appConfig: Config })
 }
 
 export const resolvers: Resolvers = {
+  DateTime: DateTimeResolver,
+  Void: VoidResolver,
+  NonEmptyString: NonEmptyStringResolver,
+  EmailAddress: EmailAddressResolver,
+
   Query: {
     getReasons: (_, __, context) => {
       throwIfNotSignedIn(context);

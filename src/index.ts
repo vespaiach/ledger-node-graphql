@@ -13,7 +13,6 @@ import fs from 'fs';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { constraintDirective, constraintDirectiveTypeDefs } from 'graphql-constraint-directive';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { DateTimeTypeDefinition, VoidTypeDefinition } from 'graphql-scalars';
 
 import { typeDefs } from '@schema/definition';
 import { ReasonDS } from '@datasource/reason';
@@ -33,7 +32,7 @@ import { UserDS } from '@datasource/user';
 
   const schema = constraintDirective()(
     makeExecutableSchema({
-      typeDefs: [DateTimeTypeDefinition, VoidTypeDefinition, constraintDirectiveTypeDefs, typeDefs],
+      typeDefs: [constraintDirectiveTypeDefs, typeDefs],
       resolvers,
     })
   );

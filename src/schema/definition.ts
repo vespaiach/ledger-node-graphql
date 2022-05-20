@@ -1,6 +1,8 @@
 const typeDefs = /* GraphQL */ `
   scalar DateTime
   scalar Void
+  scalar NonEmptyString
+  scalar EmailAddress
 
   type User {
     id: Int!
@@ -38,10 +40,12 @@ const typeDefs = /* GraphQL */ `
 
   type Query {
     getReasons: [Reason!]
+
     getTransaction(id: Int!): Transaction
+
     getTransactions(
-      fromDate: DateTime 
-      toDate: DateTime 
+      fromDate: DateTime
+      toDate: DateTime
       fromAmount: Int
       toAmount: Int
       reasons: [String!]
@@ -53,38 +57,43 @@ const typeDefs = /* GraphQL */ `
   type Mutation {
     createUser(
       username: String! @constraint(pattern: "^[0-9a-zA-Z_]*$", minLength: 3, maxLength: 127)
-      email: String! @constraint(minLength: 8, format: "email", maxLength: 255)
+      email: EmailAddress!
       password: String! @constraint(minLength: 5, maxLength: 127)
       firstName: String @constraint(maxLength: 127)
       lastName: String @constraint(maxLength: 127)
     ): User
+
     updateUser(
       username: String @constraint(pattern: "^[0-9a-zA-Z_]*$", minLength: 3, maxLength: 127)
-      email: String @constraint(minLength: 8, format: "email", maxLength: 255)
+      email: EmailAddress
       password: String @constraint(minLength: 5, maxLength: 127)
       firstName: String
       lastName: String
       isActive: Boolean
     ): User
+
     createTransaction(
       date: DateTime!
       amount: Float!
-      reasons: [String!]!
+      reasons: [NonEmptyString]!
       note: String
     ): Transaction
+
     updateTransaction(
       id: Int!
       date: DateTime
       amount: Float
-      reasons: [String!]
+      reasons: [NonEmptyString!]
       note: String
     ): Transaction
+
     deleteTransaction(id: Int!): Boolean
 
     signin(
       username: String! @constraint(pattern: "^[0-9a-zA-Z_]*$", minLength: 3, maxLength: 127)
       password: String! @constraint(minLength: 5, maxLength: 127)
     ): String!
+
     signout: Void
   }
 `;
