@@ -19,6 +19,7 @@ import { dbClient } from '@db';
 import { TransactionDS } from '@datasource/transaction';
 import { TokenDS } from '@datasource/token';
 import Config from './config';
+import { UserDS } from '@datasource/user';
 
 (async function startServer() {
   const keyPath = Config.get('ssl_certificates')?.key;
@@ -51,6 +52,7 @@ import Config from './config';
       tokenDs,
       reasonDs: new ReasonDS(dbClient),
       transactionDs: new TransactionDS(dbClient),
+      userDs: new UserDS(dbClient),
     }),
 
     context: async ({ req }) => {
