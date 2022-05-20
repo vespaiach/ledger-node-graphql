@@ -1,83 +1,75 @@
-import { Prisma, PrismaClient, Transaction } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import faker from '@faker-js/faker';
+import bcrypt from 'bcryptjs';
+
+import { TransactionDS } from '@datasource/transaction';
+import { UserDS } from '@datasource/user';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.reason.createMany({
-    data: [
-      { text: 'pay for food' },
-      { text: 'pay for gifts' },
-      { text: 'pay for health/medical' },
-      { text: 'pay for home fixing' },
-      { text: 'pay for personal' },
-      { text: 'pay for transportation' },
-      { text: 'pay for travel' },
-      { text: 'pay for pets' },
-      { text: 'pay for utilities' },
-      { text: 'income from savings' },
-      { text: 'income from paycheck' },
-      { text: 'income from interest' },
-      { text: 'income from bonus' },
-      { text: 'other' },
-    ],
-  });
+  const payReasons = [
+    { text: 'pay for food' },
+    { text: 'pay for gifts' },
+    { text: 'pay for health/medical' },
+    { text: 'pay for home fixing' },
+    { text: 'pay for personal' },
+    { text: 'pay for transportation' },
+    { text: 'pay for travel' },
+    { text: 'pay for pets' },
+    { text: 'pay for utilities' },
+  ];
+  const earnReasons = [
+    { text: 'income from savings' },
+    { text: 'income from paycheck' },
+    { text: 'income from interest' },
+    { text: 'income from bonus' },
+    { text: 'other' },
+  ];
 
-  const payReasonIds = await prisma.reason.findMany({
-    where: {
-      text: {
-        startsWith: 'pay for',
-      },
-    },
-    select: {
-      id: true,
-    },
-  });
+  const tranDs = new TransactionDS(prisma);
+  const userDs = new UserDS(prisma);
 
-  const incomeReasonIds = await prisma.reason.findMany({
-    where: {
-      text: {
-        startsWith: 'income from',
-      },
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  await Promise.all([
-    createTransactions(payReasonIds, -1, 1000),
-    createTransactions(incomeReasonIds, 1, 1000),
-    createTransactions(payReasonIds, -1, 1000),
-    createTransactions(incomeReasonIds, 1, 1000),
-    createTransactions(payReasonIds, -1, 1000),
-    createTransactions(incomeReasonIds, 1, 1000),
-    createTransactions(payReasonIds, -1, 1000),
-    createTransactions(incomeReasonIds, 1, 1000),
-    createTransactions(payReasonIds, -1, 1000),
-    createTransactions(incomeReasonIds, 1, 1000),
-  ]);
-}
-
-async function createTransactions(reasons: { id: number }[], factor: number, loop: number) {
-  const fromDate = new Date();
-  const toDate = new Date(fromDate);
-  fromDate.setMonth(-36);
-  const transactions: Omit<Transaction, 'id'>[] = [];
-
-  for (let i = 0; i < loop; i++) {
-    const date = faker.date.between(fromDate.toISOString(), toDate.toISOString());
-    const reasonInd = faker.datatype.number({ min: 0, max: reasons.length - 1 });
-
-    transactions.push({
-      amount: new Prisma.Decimal(factor * parseFloat(faker.finance.amount(1, 1000, 2))),
-      date,
-      note: faker.lorem.sentence(),
-      updatedAt: date,
+  let user = await userDs.getUserByUsername({ username: 'tester' });
+  if (!user) {
+    user = await userDs.create({
+      username: 'tester',
+      password: bcrypt.hashSync('12345', 10),
+      email: 'tester@email.com',
     });
   }
 
-  await prisma.transaction.createMany({ data: transactions });
+  for (let i = 0; i < 80; i++) {
+    const date = faker.date.between('2021-01-01T00:00:00.000Z', new Date().toISOString());
+    const reasonInd = faker.datatype.number({ min: 0, max: payReasons.length - 1 });
+
+    await tranDs.createTransaction(
+      {
+        amount: parseFloat(faker.finance.amount(1, 1000, 2)) * -1,
+        date,
+        note: faker.lorem.sentence(),
+        reasons: [payReasons[reasonInd].text],
+      },
+      user.id
+    );
+  }
+
+  for (let i = 0; i < 20; i++) {
+    const date = faker.date.between('2021-01-01T00:00:00.000Z', new Date().toISOString());
+    const reasonInd = faker.datatype.number({ min: 0, max: earnReasons.length - 1 });
+
+    await tranDs.createTransaction(
+      {
+        amount: parseFloat(faker.finance.amount(1, 1000, 2)),
+        date,
+        note: faker.lorem.sentence(),
+        reasons: [earnReasons[reasonInd].text],
+      },
+      user.id
+    );
+  }
+
+  console.log(`Created 100 transactions for user: tester/12345`);
 }
 
 main()

@@ -1,29 +1,30 @@
 import { DataSource } from 'apollo-datasource';
 import { PrismaClient } from '@prisma/client';
+import LRU from 'lru-cache';
 
 import { ReasonModel } from '@schema/types';
 
-/**
- * To prevent querying reason multiple times, we'll store whole reason list in memory for fast accessing.
- * If there is a reason record that is not in the memory list, give it a change to re-fetch whole memory list
- * before returning undefined.
- */
 export class ReasonDS extends DataSource {
   dbClient: PrismaClient;
-  cache: Record<string, ReasonModel>;
+  cache: LRU<string, ReasonModel>;
 
   constructor(dbClient: PrismaClient) {
     super();
     this.dbClient = dbClient;
-    this.cache = {};
+    this.cache = new LRU({ max: 50 });
   }
 
   public async _get(text: string): Promise<ReasonModel | undefined> {
-    if (this.cache[text]) return this.cache[text];
+    if (this.cache.has(text)) return this.cache.get(text);
 
-    this.cache = Object.fromEntries((await this.getReasons()).map((r) => [r.text, r]));
+    const reason = await this.dbClient.reason.findFirst({ where: { text } });
 
-    return this.cache[text];
+    if (reason) {
+      this.cache.set(reason.text, reason);
+      return reason;
+    }
+
+    return undefined;
   }
 
   public getReasons(): Promise<ReasonModel[]> {
@@ -88,13 +89,26 @@ export class ReasonDS extends DataSource {
   }
 
   public async getOrCreateReasons(texts: string[]): Promise<ReasonModel[]> {
-    const newReasonTexts = texts.filter((r) => !this._get(r));
-    const dt = new Date();
+    const result: ReasonModel[] = [];
 
-    this.dbClient.reason.createMany({
-      data: newReasonTexts.map((t) => ({ text: t, createdAt: dt, updatedAt: dt })),
-    });
+    for (const text of texts) {
+      const cachedReason = await this._get(text);
+      if (cachedReason) {
+        result.push(cachedReason);
+      } else {
+        const dt = new Date();
+        result.push(
+          await this.dbClient.reason.create({
+            data: {
+              text,
+              createdAt: dt,
+              updatedAt: dt,
+            },
+          })
+        );
+      }
+    }
 
-    return texts.map((t) => this._get(t) as unknown) as ReasonModel[];
+    return result;
   }
 }

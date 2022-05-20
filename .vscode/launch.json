@@ -10,7 +10,6 @@
         "-r",
         "${workspaceFolder}/node_modules/tsconfig-paths/register"
       ],
-      "protocol": "inspector",
       "args": ["./src/index.ts"],
       "skipFiles": ["<node_internals>/**"],
       "cwd": "${workspaceRoot}",

@@ -32,7 +32,7 @@
     "start": "node ./build/index.js",
     "build": "tsc -p . && tscpaths -p tsconfig.json -s ./src -o ./build",
     "gentype": "graphql-codegen --config codegen.yml",
-    "seed": "ts-node ./src/db/seed.ts",
+    "seed": "ts-node -r tsconfig-paths/register ./src/db/seed.ts",
     "migrate": "prisma migrate dev"
   },
   "devDependencies": {

@@ -1,32 +1,17 @@
 # Description
 
-This repository is a Graphql Server to provide back-end APIs for [Ledger Web App](https://ledger.dedyn.io/)
+This repository is a Graphql Server to provide back-end APIs for Ledger Web App.
 
-# Playground
+# DB Schema
 
-Test the server from this link https://backend-ledger.dedyn.io/graphql
+There are three tables: user, transaction and reason.
 
-# How to run it locally
+![Database schema](https://raw.githubusercontent.com/vespaiach/ledger-node-graphql/main/db.jpg)
 
-Copy `.env.template` to `.env` and update those variables:
+# Development 
 
-| Variables                          | Value                                                   | Required | Default                                                                                                                |
-| ---------------------------------- | ------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| NODE_ENV                           | `production`, `development`                             | no       | `development`                                                                                                          |
-| LEDGER_BACKEND_APP_PORT            | any port number                                         | no       | 3333                                                                                                                   |
-| LEDGER_DATABASE_URL                | url of PostgresQL database server                       | yes      |                                                                                                                        |
-| LEDGER_FRONTEND_BASE_URL           | url of Ledger Web App                                   | yes      | http://localhost:3000/                                                                                                 |
-| LEDGER_SSL_KEY                     | path of ssl key file                                    | no       |                                                                                                                        |
-| LEDGER_SSL_CERT                    | path of ssl cert file                                   | no       |                                                                                                                        |
-| LEDGER_SMTP_USER                   | SMTP account                                            | yes      |                                                                                                                        |
-| LEDGER_SMTP_PASS                   | SMTP password                                           | yes      |                                                                                                                        |
-| LEDGER_SIGNIN_EMAIL_FROM           | Email address that sign-in token will be sent from      | yes      |                                                                                                                        |
-| LEDGER_SIGNIN_EMAIL_SUBJECT        | Email's subject                                         | yes      | 'Ledger Sign In'                                                                                                       |
-| LEDGER_SIGNIN_EMAIL_TEMPLATE       | Email's template                                        | yes      | `<h3>Ledger</h3><p>Please use the sign-in key <stong>{{key}}</strong> to sign in, or click on this link {{link}}.</p>` |
-| LEDGER_SIGNIN_JWT_ALGORITHM        | `HS*`, `RS*`                                            | yes      | `HS256`                                                                                                                |
-| LEDGER_SIGNIN_JWT_SECRET           | any secret string                                       | yes      |                                                                                                                        |
-| LEDGER_SIGNIN_KEY_AVAILABLE_TIME   | available time in minutes after a sign-in key is issued | yes      | 2                                                                                                                      |
-| LEDGER_SIGNIN_TOKEN_AVAILABLE_TIME | available time in minutes of a sign-in token            | yes      | 4320                                                                                                                   |
+Copy `.env.template` to `.env` and update `LEDGER_DATABASE_URL` variable to PostgresQL server database.
+
 
 1. Install packages
 
@@ -52,6 +37,21 @@ npm run seed
 npm run dev
 ```
 
+# Deployment
+
+Before deploying, set/update environment settings: 
+ 
+| Variables                          | Value                                        | Required | Default       |
+| ---------------------------------- | -------------------------------------------- | -------- | ------------- |
+| NODE_ENV                           | `production`, `development`                  | no       | `development` |
+| LEDGER_BACKEND_APP_PORT            | any port number                              | no       | 3333          |
+| LEDGER_DATABASE_URL                | url of PostgresQL database server            | yes      |               |
+| LEDGER_SSL_KEY                     | path of ssl key file                         | no       |               |
+| LEDGER_SSL_CERT                    | path of ssl cert file                        | no       |               |
+| LEDGER_SIGNIN_JWT_ALGORITHM        | `HS*`, `RS*`                                 | yes      | `HS256`       |
+| LEDGER_SIGNIN_JWT_SECRET           | any secret string                            | yes      |               |
+| LEDGER_SIGNIN_TOKEN_AVAILABLE_TIME | available time in minutes of a sign-in token | yes      | 4320          |
+
 ## NPM Commands
 
 | Command         | Note                                     |
@@ -68,7 +68,3 @@ npm run dev
 - Nodejs (>= 12.x.x) / Typescript
 - Apollo Server / Expressjs / GraphQL
 - Prismajs / PostgresQL
-
-# Contributes
-
-Pull requests are welcome.
