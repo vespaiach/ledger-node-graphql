@@ -26,7 +26,8 @@
       "@resolver": ["src/resolver"],
       "@schema/*": ["src/schema/*"],
       "@db": ["src/db"],
-      "@db/*": ["src/db/*"]
+      "@db/*": ["src/db/*"],
+      "@util/*": ["src/util/*"]
     }
   },
   "include": ["src", "src/global.d.ts"],

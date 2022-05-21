@@ -5,7 +5,7 @@ import { VoidResolver, DateTimeResolver, NonEmptyStringResolver, EmailAddressRes
 import { Resolvers } from '@schema/types.generated';
 import { CustomContext, UserModel } from '@schema/types';
 import { Config } from 'src/config';
-import { comparePassword, hashPassword } from 'src/util/hash';
+import { hashPassword, comparePassword } from '@util/hashing';
 
 function throwIfNotSignedIn(context: CustomContext): { exp: Date; token: string; userId: number } {
   const { tokenPayload, token } = context;
