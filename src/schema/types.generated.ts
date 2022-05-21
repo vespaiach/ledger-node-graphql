@@ -5,7 +5,6 @@ export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -33,10 +32,10 @@ export type Mutation = {
 
 
 export type MutationCreateTransactionArgs = {
-  amount: Scalars['Float'];
+  amount: Scalars['Int'];
   date: Scalars['DateTime'];
   note?: InputMaybe<Scalars['String']>;
-  reasons: Array<Scalars['NonEmptyString']>;
+  reasons: Array<InputMaybe<Scalars['NonEmptyString']>>;
 };
 
 
@@ -61,11 +60,11 @@ export type MutationSigninArgs = {
 
 
 export type MutationUpdateTransactionArgs = {
-  amount?: InputMaybe<Scalars['Float']>;
+  amount?: InputMaybe<Scalars['Int']>;
   date?: InputMaybe<Scalars['DateTime']>;
   id: Scalars['Int'];
   note?: InputMaybe<Scalars['String']>;
-  reasons?: InputMaybe<Array<Scalars['String']>>;
+  reasons?: InputMaybe<Array<Scalars['NonEmptyString']>>;
 };
 
 
@@ -105,26 +104,16 @@ export type Reason = {
   __typename?: 'Reason';
   id: Scalars['Int'];
   text: Scalars['String'];
-  transactions?: Maybe<Array<Transaction>>;
   updatedAt: Scalars['DateTime'];
 };
 
 export type Transaction = {
   __typename?: 'Transaction';
-  amount: Scalars['Float'];
+  amount: Scalars['Int'];
   date: Scalars['DateTime'];
   id: Scalars['Int'];
   note?: Maybe<Scalars['String']>;
   reasons: Array<Reason>;
-  updatedAt: Scalars['DateTime'];
-};
-
-export type TransactionsReasons = {
-  __typename?: 'TransactionsReasons';
-  reason: Reason;
-  reasonId: Scalars['Int'];
-  transaction: Transaction;
-  transactionId: Scalars['Int'];
   updatedAt: Scalars['DateTime'];
 };
 
@@ -212,7 +201,6 @@ export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
   EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']>;
-  Float: ResolverTypeWrapper<Scalars['Float']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
   NonEmptyString: ResolverTypeWrapper<Scalars['NonEmptyString']>;
@@ -220,7 +208,6 @@ export type ResolversTypes = ResolversObject<{
   Reason: ResolverTypeWrapper<ReasonModel>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Transaction: ResolverTypeWrapper<TransactionModel>;
-  TransactionsReasons: ResolverTypeWrapper<Omit<TransactionsReasons, 'reason' | 'transaction'> & { reason: ResolversTypes['Reason'], transaction: ResolversTypes['Transaction'] }>;
   User: ResolverTypeWrapper<User>;
   Void: ResolverTypeWrapper<Scalars['Void']>;
 }>;
@@ -230,7 +217,6 @@ export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean'];
   DateTime: Scalars['DateTime'];
   EmailAddress: Scalars['EmailAddress'];
-  Float: Scalars['Float'];
   Int: Scalars['Int'];
   Mutation: {};
   NonEmptyString: Scalars['NonEmptyString'];
@@ -238,7 +224,6 @@ export type ResolversParentTypes = ResolversObject<{
   Reason: ReasonModel;
   String: Scalars['String'];
   Transaction: TransactionModel;
-  TransactionsReasons: Omit<TransactionsReasons, 'reason' | 'transaction'> & { reason: ResolversParentTypes['Reason'], transaction: ResolversParentTypes['Transaction'] };
   User: User;
   Void: Scalars['Void'];
 }>;
@@ -274,26 +259,16 @@ export type QueryResolvers<ContextType = CustomContext, ParentType extends Resol
 export type ReasonResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Reason'] = ResolversParentTypes['Reason']> = ResolversObject<{
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   text?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  transactions?: Resolver<Maybe<Array<ResolversTypes['Transaction']>>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type TransactionResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Transaction'] = ResolversParentTypes['Transaction']> = ResolversObject<{
-  amount?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
+  amount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   date?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   note?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   reasons?: Resolver<Array<ResolversTypes['Reason']>, ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type TransactionsReasonsResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['TransactionsReasons'] = ResolversParentTypes['TransactionsReasons']> = ResolversObject<{
-  reason?: Resolver<ResolversTypes['Reason'], ParentType, ContextType>;
-  reasonId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  transaction?: Resolver<ResolversTypes['Transaction'], ParentType, ContextType>;
-  transactionId?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -321,7 +296,6 @@ export type Resolvers<ContextType = CustomContext> = ResolversObject<{
   Query?: QueryResolvers<ContextType>;
   Reason?: ReasonResolvers<ContextType>;
   Transaction?: TransactionResolvers<ContextType>;
-  TransactionsReasons?: TransactionsReasonsResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
   Void?: GraphQLScalarType;
 }>;

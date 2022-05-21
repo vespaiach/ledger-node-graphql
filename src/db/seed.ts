@@ -45,7 +45,7 @@ async function main() {
 
     await tranDs.createTransaction(
       {
-        amount: parseFloat(faker.finance.amount(1, 1000, 2)) * -1,
+        amount: parseInt(faker.random.numeric(6)) * -1,
         date,
         note: faker.lorem.sentence(),
         reasons: [payReasons[reasonInd].text],
@@ -60,7 +60,7 @@ async function main() {
 
     await tranDs.createTransaction(
       {
-        amount: parseFloat(faker.finance.amount(1, 1000, 2)),
+        amount: parseInt(faker.random.numeric(6)) * -1,
         date,
         note: faker.lorem.sentence(),
         reasons: [earnReasons[reasonInd].text],

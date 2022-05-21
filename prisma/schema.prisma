@@ -20,8 +20,8 @@ model Reason {
 
 model Transaction {
   id        Int      @id @default(autoincrement())
-  amount    Decimal  @db.Decimal(15, 2)
-  date      DateTime @db.Date
+  amount    Int
+  date      DateTime
   note      String?  @db.VarChar(511)
   updatedAt DateTime @default(now()) @map("updated_at")
   createdAt DateTime @default(now()) @map("created_at")

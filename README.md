@@ -52,6 +52,12 @@ Before deploying, set/update environment settings:
 | LEDGER_SIGNIN_JWT_SECRET           | any secret string                            | yes      |               |
 | LEDGER_SIGNIN_TOKEN_AVAILABLE_TIME | available time in minutes of a sign-in token | yes      | 4320          |
 
+**Note:**
+
+When deploying to Heroku, don't set these env variables:
+ - `LEDGER_BACKEND_APP_PORT` Heroku is controling the port, so it doesn't allow to specify any server port.
+ - `LEDGER_SSL_KEY` and `LEDGER_SSL_CERT` are non-sense to be set, since Heroku support SSL out of the box.
+
 ## NPM Commands
 
 | Command         | Note                                     |
@@ -68,3 +74,11 @@ Before deploying, set/update environment settings:
 - Nodejs (>= 12.x.x) / Typescript
 - Apollo Server / Expressjs / GraphQL
 - Prismajs / PostgresQL
+
+# Playground 
+
+[https://ledger-node-graphql.herokuapp.com/graphql](https://ledger-node-graphql.herokuapp.com/graphql)
+
+You can use the testing account: `tester/12345` to test.
+
+![How to sign-in and use the sign-in token](https://raw.githubusercontent.com/vespaiach/ledger-node-graphql/main/dry_run.gif)

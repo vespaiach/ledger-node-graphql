@@ -16,7 +16,7 @@ const typeDefs = /* GraphQL */ `
 
   type Transaction {
     id: Int!
-    amount: Float!
+    amount: Int!
     date: DateTime!
     note: String
     updatedAt: DateTime!
@@ -26,15 +26,6 @@ const typeDefs = /* GraphQL */ `
   type Reason {
     id: Int!
     text: String!
-    updatedAt: DateTime!
-    transactions: [Transaction!]
-  }
-
-  type TransactionsReasons {
-    reasonId: Int!
-    reason: Reason!
-    transactionId: Int!
-    transaction: Transaction!
     updatedAt: DateTime!
   }
 
@@ -74,7 +65,7 @@ const typeDefs = /* GraphQL */ `
 
     createTransaction(
       date: DateTime!
-      amount: Float!
+      amount: Int!
       reasons: [NonEmptyString]!
       note: String
     ): Transaction
@@ -82,7 +73,7 @@ const typeDefs = /* GraphQL */ `
     updateTransaction(
       id: Int!
       date: DateTime
-      amount: Float
+      amount: Int
       reasons: [NonEmptyString!]
       note: String
     ): Transaction
