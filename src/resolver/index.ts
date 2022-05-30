@@ -1,6 +1,11 @@
 import { ApolloError, AuthenticationError } from 'apollo-server-errors';
 import jwt from 'jsonwebtoken';
-import { VoidResolver, DateTimeResolver, NonEmptyStringResolver, EmailAddressResolver } from 'graphql-scalars';
+import {
+  VoidResolver,
+  DateTimeResolver,
+  NonEmptyStringResolver,
+  EmailAddressResolver,
+} from 'graphql-scalars';
 
 import { Resolvers } from '@schema/types.generated';
 import { CustomContext, UserModel } from '@schema/types';
@@ -55,11 +60,18 @@ export const resolvers: Resolvers = {
       return transactionDs.getTransaction(args, userId);
     },
 
-    getTransactions: (_, args, context) => {
+    getTransactions: async (_, args, context) => {
       const { userId } = throwIfNotSignedIn(context);
 
       const { transactionDs } = context.dataSources;
-      return transactionDs.getTransactions(args, userId);
+      const take = args.take ?? 50;
+      const skip = args.skip ?? 0;
+
+      return {
+        ...(await transactionDs.getTransactions({ ...args, skip, take }, userId)),
+        take,
+        skip,
+      };
     },
   },
 

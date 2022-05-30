@@ -29,6 +29,13 @@ const typeDefs = /* GraphQL */ `
     updatedAt: DateTime!
   }
 
+  type TransactionsResponse {
+    transactions: [Transaction!]!
+    total: Int!
+    take: Int!
+    skip: Int!
+  }
+
   type Query {
     getReasons: [Reason!]
 
@@ -42,7 +49,7 @@ const typeDefs = /* GraphQL */ `
       reasons: [String!]
       take: Int = 50
       skip: Int = 0
-    ): [Transaction!]
+    ): TransactionsResponse
   }
 
   type Mutation {

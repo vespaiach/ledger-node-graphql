@@ -22,11 +22,11 @@ export class TransactionDS extends DataSource {
   }
 
   public async getTransactions(
-    args: QueryGetTransactionsArgs,
+    args: Omit<QueryGetTransactionsArgs, 'take' | 'skip'> & { skip: number; take: number },
     userId: number
-  ): Promise<TransactionModel[]> {
-    const take = args.take ?? 50;
-    const skip = args.skip ?? 0;
+  ): Promise<{ transactions: TransactionModel[]; total: number }> {
+    const take = args.take;
+    const skip = args.skip;
 
     const gteAmount = args.fromAmount || undefined;
     const lteAmount = args.toAmount || undefined;
@@ -48,6 +48,30 @@ export class TransactionDS extends DataSource {
         };
       }
     }
+
+    const total = await this.dbClient.transaction.count({
+      where: {
+        userId,
+
+        date:
+          args.fromDate || args.toDate
+            ? {
+                gte: args.fromDate ? args.fromDate : undefined,
+                lte: args.toDate ? args.toDate : undefined,
+              }
+            : undefined,
+
+        amount:
+          gteAmount || lteAmount
+            ? {
+                gte: gteAmount,
+                lte: lteAmount,
+              }
+            : undefined,
+
+        reasons,
+      },
+    });
 
     const result = await this.dbClient.transaction.findMany({
       orderBy: {
@@ -78,7 +102,10 @@ export class TransactionDS extends DataSource {
       },
     });
 
-    return result as TransactionModel[];
+    return {
+      transactions: result as TransactionModel[],
+      total,
+    };
   }
 
   public getTransaction(

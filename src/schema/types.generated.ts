@@ -5,6 +5,7 @@ export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -81,7 +82,7 @@ export type Query = {
   __typename?: 'Query';
   getReasons?: Maybe<Array<Reason>>;
   getTransaction?: Maybe<Transaction>;
-  getTransactions?: Maybe<Array<Transaction>>;
+  getTransactions?: Maybe<TransactionsResponse>;
 };
 
 
@@ -115,6 +116,14 @@ export type Transaction = {
   note?: Maybe<Scalars['String']>;
   reasons: Array<Reason>;
   updatedAt: Scalars['DateTime'];
+};
+
+export type TransactionsResponse = {
+  __typename?: 'TransactionsResponse';
+  skip: Scalars['Int'];
+  take: Scalars['Int'];
+  total: Scalars['Int'];
+  transactions: Array<Transaction>;
 };
 
 export type User = {
@@ -208,6 +217,7 @@ export type ResolversTypes = ResolversObject<{
   Reason: ResolverTypeWrapper<ReasonModel>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Transaction: ResolverTypeWrapper<TransactionModel>;
+  TransactionsResponse: ResolverTypeWrapper<Omit<TransactionsResponse, 'transactions'> & { transactions: Array<ResolversTypes['Transaction']> }>;
   User: ResolverTypeWrapper<User>;
   Void: ResolverTypeWrapper<Scalars['Void']>;
 }>;
@@ -224,6 +234,7 @@ export type ResolversParentTypes = ResolversObject<{
   Reason: ReasonModel;
   String: Scalars['String'];
   Transaction: TransactionModel;
+  TransactionsResponse: Omit<TransactionsResponse, 'transactions'> & { transactions: Array<ResolversParentTypes['Transaction']> };
   User: User;
   Void: Scalars['Void'];
 }>;
@@ -253,7 +264,7 @@ export interface NonEmptyStringScalarConfig extends GraphQLScalarTypeConfig<Reso
 export type QueryResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   getReasons?: Resolver<Maybe<Array<ResolversTypes['Reason']>>, ParentType, ContextType>;
   getTransaction?: Resolver<Maybe<ResolversTypes['Transaction']>, ParentType, ContextType, RequireFields<QueryGetTransactionArgs, 'id'>>;
-  getTransactions?: Resolver<Maybe<Array<ResolversTypes['Transaction']>>, ParentType, ContextType, RequireFields<QueryGetTransactionsArgs, 'skip' | 'take'>>;
+  getTransactions?: Resolver<Maybe<ResolversTypes['TransactionsResponse']>, ParentType, ContextType, RequireFields<QueryGetTransactionsArgs, 'skip' | 'take'>>;
 }>;
 
 export type ReasonResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Reason'] = ResolversParentTypes['Reason']> = ResolversObject<{
@@ -270,6 +281,14 @@ export type TransactionResolvers<ContextType = CustomContext, ParentType extends
   note?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   reasons?: Resolver<Array<ResolversTypes['Reason']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type TransactionsResponseResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['TransactionsResponse'] = ResolversParentTypes['TransactionsResponse']> = ResolversObject<{
+  skip?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  take?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  total?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  transactions?: Resolver<Array<ResolversTypes['Transaction']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -296,6 +315,7 @@ export type Resolvers<ContextType = CustomContext> = ResolversObject<{
   Query?: QueryResolvers<ContextType>;
   Reason?: ReasonResolvers<ContextType>;
   Transaction?: TransactionResolvers<ContextType>;
+  TransactionsResponse?: TransactionsResponseResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
   Void?: GraphQLScalarType;
 }>;
