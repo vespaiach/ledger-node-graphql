@@ -175,10 +175,22 @@ export class TransactionDS extends DataSource {
 
     if (!tran) return;
 
-    await this.dbClient.transaction.delete({
-      where: {
-        id: args.id,
-      },
-    });
+    await this.dbClient.$transaction([
+      ...tran.reasons.map((r) =>
+        this.dbClient.transactionsReasons.delete({
+          where: {
+            reasonId_transactionId: {
+              transactionId: r.transactionId,
+              reasonId: r.reasonId,
+            },
+          },
+        })
+      ),
+      this.dbClient.transaction.delete({
+        where: {
+          id: args.id,
+        },
+      }),
+    ]);
   }
 }
