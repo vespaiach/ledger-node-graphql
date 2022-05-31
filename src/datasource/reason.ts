@@ -1,33 +1,33 @@
 import { DataSource } from 'apollo-datasource';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Reason } from '@prisma/client';
 import LRU from 'lru-cache';
-
-import { ReasonModel } from '@schema/types';
 
 export class ReasonDS extends DataSource {
   dbClient: PrismaClient;
-  cache: LRU<string, ReasonModel>;
+  cacheByText: LRU<string, Reason>;
+  cacheById: LRU<number, Reason>;
 
   constructor(dbClient: PrismaClient) {
     super();
     this.dbClient = dbClient;
-    this.cache = new LRU({ max: 50 });
+    this.cacheByText = new LRU({ max: 50 });
+    this.cacheById = new LRU({ max: 50 });
   }
 
-  public async _get(text: string): Promise<ReasonModel | undefined> {
-    if (this.cache.has(text)) return this.cache.get(text);
+  public async _get(text: string): Promise<Reason | undefined> {
+    if (this.cacheByText.has(text)) return this.cacheByText.get(text);
 
     const reason = await this.dbClient.reason.findFirst({ where: { text } });
 
     if (reason) {
-      this.cache.set(reason.text, reason);
+      this.cacheByText.set(reason.text, reason);
       return reason;
     }
 
     return undefined;
   }
 
-  public getReasons(): Promise<ReasonModel[]> {
+  public getReasons(): Promise<Reason[]> {
     return this.dbClient.reason.findMany({
       orderBy: [
         {
@@ -47,7 +47,7 @@ export class ReasonDS extends DataSource {
     transactionId,
   }: {
     transactionId: number;
-  }): Promise<ReasonModel[]> {
+  }): Promise<Reason[]> {
     return this.dbClient.reason.findMany({
       orderBy: [
         {
@@ -70,26 +70,33 @@ export class ReasonDS extends DataSource {
     });
   }
 
-  public async getReasonById(id: number): Promise<ReasonModel | null> {
-    return this.dbClient.reason.findFirst({
-      where: {
-        id,
-      },
-      select: {
-        id: true,
-        text: true,
-        updatedAt: true,
-        createdAt: true,
-      },
-    });
+  public async getReasonById(id: number): Promise<Reason | null> {
+    if (!this.cacheById.has(id)) {
+      const reason = await this.dbClient.reason.findFirst({
+        where: {
+          id,
+        },
+        select: {
+          id: true,
+          text: true,
+          updatedAt: true,
+          createdAt: true,
+        },
+      });
+      if (reason) {
+        this.cacheById.set(reason.id, reason);
+      }
+    }
+
+    return this.cacheById.get(id) || null;
   }
 
-  public getReasonByText(text: string): Promise<ReasonModel | undefined> {
+  public getReasonByText(text: string): Promise<Reason | undefined> {
     return this._get(text);
   }
 
-  public async getOrCreateReasons(texts: string[]): Promise<ReasonModel[]> {
-    const result: ReasonModel[] = [];
+  public async getOrCreateReasons(texts: string[]): Promise<Reason[]> {
+    const result: Reason[] = [];
 
     for (const text of texts) {
       const cachedReason = await this._get(text);

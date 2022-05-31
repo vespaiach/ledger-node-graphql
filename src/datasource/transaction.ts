@@ -1,7 +1,6 @@
 import { DataSource } from 'apollo-datasource';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Reason, Transaction } from '@prisma/client';
 
-import { ReasonModel, TransactionModel } from '@schema/types';
 import {
   MutationCreateTransactionArgs,
   MutationDeleteTransactionArgs,
@@ -24,7 +23,7 @@ export class TransactionDS extends DataSource {
   public async getTransactions(
     args: Omit<QueryGetTransactionsArgs, 'take' | 'skip'> & { skip: number; take: number },
     userId: number
-  ): Promise<{ transactions: TransactionModel[]; total: number }> {
+  ): Promise<{ transactions: Transaction[]; total: number }> {
     const take = args.take;
     const skip = args.skip;
 
@@ -38,7 +37,7 @@ export class TransactionDS extends DataSource {
       // Todo: find another way to typing this code better
       const reasonsList = (
         await Promise.all(reasonTexts.map((t) => this.reasonDS.getReasonByText(t)))
-      ).filter(Boolean) as unknown as ReasonModel[];
+      ).filter(Boolean) as unknown as Reason[];
 
       if (reasonsList && reasonsList.length) {
         reasons = {
@@ -74,6 +73,16 @@ export class TransactionDS extends DataSource {
     });
 
     const result = await this.dbClient.transaction.findMany({
+      select: {
+        reasons: true,
+        amount: true,
+        date: true,
+        id: true,
+        note: true,
+        updatedAt: true,
+        createdAt: true,
+        userId: true,
+      },
       orderBy: {
         date: 'desc',
       },
@@ -103,7 +112,7 @@ export class TransactionDS extends DataSource {
     });
 
     return {
-      transactions: result as TransactionModel[],
+      transactions: result as unknown as Transaction[],
       total,
     };
   }
@@ -111,7 +120,7 @@ export class TransactionDS extends DataSource {
   public getTransaction(
     args: QueryGetTransactionArgs,
     userId: number
-  ): Promise<TransactionModel | null> {
+  ): Promise<Transaction | null> {
     return this.dbClient.transaction.findFirst({
       where: { id: args.id, userId },
     });
@@ -124,7 +133,7 @@ export class TransactionDS extends DataSource {
   public async createTransaction(
     args: MutationCreateTransactionArgs,
     userId: number
-  ): Promise<TransactionModel> {
+  ): Promise<Transaction> {
     const reasons = await this.reasonDS.getOrCreateReasons(args.reasons);
 
     return this.dbClient.transaction.create({
@@ -145,7 +154,7 @@ export class TransactionDS extends DataSource {
   public async updateTransaction(
     args: MutationUpdateTransactionArgs,
     userId: number
-  ): Promise<TransactionModel | null> {
+  ): Promise<Transaction | null> {
     const tran = await this.dbClient.transaction.findFirst({
       include: { reasons: true },
       where: { id: args.id, userId },
@@ -153,7 +162,7 @@ export class TransactionDS extends DataSource {
 
     if (!tran) return null;
 
-    let reasonsObj: ReasonModel[] | undefined = undefined;
+    let reasonsObj: Reason[] | undefined = undefined;
     if (args.reasons && args.reasons.length) {
       reasonsObj = await this.reasonDS.getOrCreateReasons(args.reasons);
     }

@@ -1,17 +1,19 @@
-schema: "src/schema/definition.ts"
+schema: 'src/schema/definition.ts'
 documents: null
 generates:
   src/schema/types.generated.ts:
     plugins:
-      - "typescript"
-      - "typescript-resolvers"
+      - 'typescript'
+      - 'typescript-resolvers'
     config:
       scalars:
-        Date: Date
+        Date: string
         Void: void
-      useIndexSignature: true
+        DateTime: string
+        EmailAddress: string
+        NonEmptyString: string
       contextType: ./types#CustomContext
-      maybeValue: T | null | undefined
       mappers:
         Reason: ./types#ReasonModel
         Transaction: ./types#TransactionModel
+        User: ./types#UserModel

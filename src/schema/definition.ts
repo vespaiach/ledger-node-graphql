@@ -73,7 +73,7 @@ const typeDefs = /* GraphQL */ `
     createTransaction(
       date: DateTime!
       amount: Int!
-      reasons: [NonEmptyString]!
+      reasons: [NonEmptyString!]!
       note: String
     ): Transaction
 

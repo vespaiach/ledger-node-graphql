@@ -1,4 +1,3 @@
-import { Reason, Transaction, User } from '@prisma/client';
 import { JwtPayload } from 'jsonwebtoken';
 
 import { ReasonDS } from 'src/datasource/reason';
@@ -6,6 +5,7 @@ import { TransactionDS } from 'src/datasource/transaction';
 import { UserDS } from '@datasource/user';
 import { TokenDS } from '@datasource/token';
 import Config from 'src/config';
+import { Resolver, Resolvers, ResolversTypes, TransactionResolvers } from './types.generated';
 
 export interface CacheValue {
   key: string;
@@ -26,6 +26,45 @@ export interface CustomContext {
   };
 }
 
-export type ReasonModel = Reason;
-export type UserModel = User;
-export type TransactionModel = Transaction;
+export interface ReasonModel {
+  id: number;
+  text: string;
+  updatedAt: Date;
+  createdAt: Date;
+}
+export interface UserModel {
+  id: number;
+  firstName: string | null;
+  lastName: string | null;
+  username: string;
+  email: string;
+  password: string;
+  isActive: boolean;
+  updatedAt: Date;
+  createdAt: Date;
+}
+export interface TransctionModel {
+  id: number;
+  amount: number;
+  date: Date;
+  note: string | null;
+  updatedAt: Date;
+  createdAt: Date;
+  userId: number;
+}
+
+export type RevisedResolvers<ContextType = CustomContext> = Omit<Resolvers, 'Transaction'> & {
+  Transaction?: Omit<TransactionResolvers<ContextType>, 'reasons'> & {
+    reasons?: Resolver<
+      Array<ResolversTypes['Reason']>,
+      TransctionModel & {
+        reasons: {
+          reasonId: number;
+          transactionId: number;
+          updatedAt: Date;
+        }[];
+      },
+      ContextType
+    >;
+  };
+};

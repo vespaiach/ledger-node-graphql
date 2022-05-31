@@ -6,9 +6,9 @@ import {
   NonEmptyStringResolver,
   EmailAddressResolver,
 } from 'graphql-scalars';
+import { Reason, User } from '@prisma/client';
 
-import { Resolvers } from '@schema/types.generated';
-import { CustomContext, UserModel } from '@schema/types';
+import { CustomContext, RevisedResolvers } from '@schema/types';
 import { Config } from 'src/config';
 import { hashPassword, comparePassword } from '@util/hashing';
 
@@ -24,7 +24,7 @@ function throwIfNotSignedIn(context: CustomContext): { exp: Date; token: string;
   };
 }
 
-function issueToken({ user, appConfig }: { user: UserModel; appConfig: Config }): string {
+function issueToken({ user, appConfig }: { user: User; appConfig: Config }): string {
   const expiresIn =
     Math.round(Date.now() / 1000) + appConfig.get('signin_token_available_time') * 60;
 
@@ -39,7 +39,7 @@ function issueToken({ user, appConfig }: { user: UserModel; appConfig: Config })
   return token;
 }
 
-export const resolvers: Resolvers = {
+export const resolvers: RevisedResolvers = {
   DateTime: DateTimeResolver,
   Void: VoidResolver,
   NonEmptyString: NonEmptyStringResolver,
@@ -77,15 +77,16 @@ export const resolvers: Resolvers = {
 
   Transaction: {
     /**
-     * Prisma will resolve the n+1 problem. Don't need DataLoader lib.
+     * Todo: fix n+1.
      */
     reasons: async (trans, _, context) => {
       throwIfNotSignedIn(context);
 
       const { reasonDs } = context.dataSources;
-      const reasons = await reasonDs.getReasonsByTransactionId({ transactionId: trans.id });
 
-      return reasons;
+      return (
+        await Promise.all(trans.reasons.map((r) => reasonDs.getReasonById(r.reasonId)))
+      ).filter(Boolean) as unknown as Reason[];
     },
   },
 

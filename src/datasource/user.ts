@@ -1,8 +1,7 @@
 import { DataSource } from 'apollo-datasource';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 
 import { MutationCreateUserArgs, MutationUpdateUserArgs } from '@schema/types.generated';
-import { UserModel } from '@schema/types';
 
 export class UserDS extends DataSource {
   dbClient: PrismaClient;
@@ -12,7 +11,7 @@ export class UserDS extends DataSource {
     this.dbClient = dbClient;
   }
 
-  public async getUserByUsername({ username }: { username: string }): Promise<UserModel | null> {
+  public async getUserByUsername({ username }: { username: string }): Promise<User | null> {
     return this.dbClient.user.findFirst({
       where: { username },
     });
@@ -24,7 +23,7 @@ export class UserDS extends DataSource {
     password,
     firstName,
     lastName,
-  }: MutationCreateUserArgs): Promise<UserModel> {
+  }: MutationCreateUserArgs): Promise<User> {
     const dt = new Date();
 
     return this.dbClient.user.create({
@@ -48,7 +47,7 @@ export class UserDS extends DataSource {
     firstName,
     lastName,
     isActive,
-  }: MutationUpdateUserArgs & { id: number }): Promise<UserModel> {
+  }: MutationUpdateUserArgs & { id: number }): Promise<User> {
     return this.dbClient.user.update({
       where: {
         id,
