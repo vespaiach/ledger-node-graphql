@@ -42,9 +42,9 @@ export interface UserModel {
   updatedAt: Date;
   createdAt: Date;
 }
-export interface TransctionModel {
+export interface TransactionModel {
   id: number;
-  amount: number;
+  amount: bigint;
   date: Date;
   note: string | null;
   updatedAt: Date;
