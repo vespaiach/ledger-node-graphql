@@ -73,16 +73,6 @@ export class TransactionDS extends DataSource {
     });
 
     const result = await this.dbClient.transaction.findMany({
-      select: {
-        reasons: true,
-        amount: true,
-        date: true,
-        id: true,
-        note: true,
-        updatedAt: true,
-        createdAt: true,
-        userId: true,
-      },
       orderBy: {
         date: 'desc',
       },

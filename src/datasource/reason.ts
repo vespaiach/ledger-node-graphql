@@ -1,5 +1,5 @@
 import { DataSource } from 'apollo-datasource';
-import { PrismaClient, Reason } from '@prisma/client';
+import { PrismaClient, Reason, TransactionsReasons } from '@prisma/client';
 import LRU from 'lru-cache';
 
 export class ReasonDS extends DataSource {
@@ -43,31 +43,24 @@ export class ReasonDS extends DataSource {
     });
   }
 
-  public getReasonsByTransactionId({
+  /**
+   * Find the reason why to use findUnique query from here:
+   * https://www.prisma.io/docs/guides/performance-and-optimization/query-optimization-performance 
+   */
+  public async getReasonsByTransactionId({
     transactionId,
   }: {
     transactionId: number;
   }): Promise<Reason[]> {
-    return this.dbClient.reason.findMany({
-      orderBy: [
-        {
-          text: 'asc',
-        },
-      ],
-      select: {
-        id: true,
-        text: true,
-        updatedAt: true,
-        createdAt: true,
-      },
-      where: {
-        transactions: {
-          some: {
-            transactionId,
+    return (
+      await this.dbClient.transaction
+        .findUnique({
+          where: {
+            id: transactionId,
           },
-        },
-      },
-    });
+        })
+        .reasons({ select: { reason: true } })
+    ).map((r) => r.reason);
   }
 
   public async getReasonById(id: number): Promise<Reason | null> {

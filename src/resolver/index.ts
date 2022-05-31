@@ -1,16 +1,14 @@
 import { ApolloError, AuthenticationError } from 'apollo-server-errors';
-import jwt from 'jsonwebtoken';
 import {
   VoidResolver,
   DateTimeResolver,
   NonEmptyStringResolver,
   EmailAddressResolver,
 } from 'graphql-scalars';
-import { Reason, User } from '@prisma/client';
 
-import { CustomContext, RevisedResolvers } from '@schema/types';
-import { Config } from 'src/config';
-import { hashPassword, comparePassword } from '@util/hashing';
+import { CustomContext } from '@schema/types';
+import { hashPassword, comparePassword, issueToken } from '@util/hashing';
+import { Resolvers } from '@schema/types.generated';
 
 function throwIfNotSignedIn(context: CustomContext): { exp: Date; token: string; userId: number } {
   const { tokenPayload, token } = context;
@@ -24,22 +22,7 @@ function throwIfNotSignedIn(context: CustomContext): { exp: Date; token: string;
   };
 }
 
-function issueToken({ user, appConfig }: { user: User; appConfig: Config }): string {
-  const expiresIn =
-    Math.round(Date.now() / 1000) + appConfig.get('signin_token_available_time') * 60;
-
-  const token = jwt.sign(
-    { email: user.email, exp: expiresIn, aud: String(user.id) },
-    appConfig.get('signin_jwt_secret'),
-    {
-      algorithm: appConfig.get('signin_jwt_algorithm'),
-    }
-  );
-
-  return token;
-}
-
-export const resolvers: RevisedResolvers = {
+export const resolvers: Resolvers = {
   DateTime: DateTimeResolver,
   Void: VoidResolver,
   NonEmptyString: NonEmptyStringResolver,
@@ -77,16 +60,16 @@ export const resolvers: RevisedResolvers = {
 
   Transaction: {
     /**
-     * Todo: fix n+1.
+     * n+1
+     * Prisma will batch queries with dataloader. Refer to this link:
+     * https://www.prisma.io/docs/guides/performance-and-optimization/query-optimization-performance
      */
     reasons: async (trans, _, context) => {
       throwIfNotSignedIn(context);
 
       const { reasonDs } = context.dataSources;
 
-      return (
-        await Promise.all(trans.reasons.map((r) => reasonDs.getReasonById(r.reasonId)))
-      ).filter(Boolean) as unknown as Reason[];
+      return reasonDs.getReasonsByTransactionId({ transactionId: trans.id });
     },
   },
 
