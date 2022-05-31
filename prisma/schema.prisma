@@ -20,7 +20,7 @@ model Reason {
 
 model Transaction {
   id        Int      @id @default(autoincrement())
-  amount    Int
+  amount    BigInt
   date      DateTime
   note      String?  @db.VarChar(511)
   updatedAt DateTime @default(now()) @map("updated_at")

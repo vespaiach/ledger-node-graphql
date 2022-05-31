@@ -3,6 +3,7 @@ const typeDefs = /* GraphQL */ `
   scalar Void
   scalar NonEmptyString
   scalar EmailAddress
+  scalar BigInt
 
   type User {
     id: Int!
@@ -16,7 +17,7 @@ const typeDefs = /* GraphQL */ `
 
   type Transaction {
     id: Int!
-    amount: Int!
+    amount: BigInt!
     date: DateTime!
     note: String
     updatedAt: DateTime!
@@ -44,8 +45,8 @@ const typeDefs = /* GraphQL */ `
     getTransactions(
       fromDate: DateTime
       toDate: DateTime
-      fromAmount: Int
-      toAmount: Int
+      fromAmount: BigInt
+      toAmount: BigInt
       reasons: [String!]
       take: Int = 50
       skip: Int = 0
@@ -72,7 +73,7 @@ const typeDefs = /* GraphQL */ `
 
     createTransaction(
       date: DateTime!
-      amount: Int!
+      amount: BigInt!
       reasons: [NonEmptyString!]!
       note: String
     ): Transaction
@@ -80,7 +81,7 @@ const typeDefs = /* GraphQL */ `
     updateTransaction(
       id: Int!
       date: DateTime
-      amount: Int
+      amount: BigInt
       reasons: [NonEmptyString!]
       note: String
     ): Transaction

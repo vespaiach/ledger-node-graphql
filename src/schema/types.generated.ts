@@ -14,6 +14,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  BigInt: any;
   DateTime: string;
   EmailAddress: string;
   NonEmptyString: string;
@@ -33,7 +34,7 @@ export type Mutation = {
 
 
 export type MutationCreateTransactionArgs = {
-  amount: Scalars['Int'];
+  amount: Scalars['BigInt'];
   date: Scalars['DateTime'];
   note?: InputMaybe<Scalars['String']>;
   reasons: Array<Scalars['NonEmptyString']>;
@@ -61,7 +62,7 @@ export type MutationSigninArgs = {
 
 
 export type MutationUpdateTransactionArgs = {
-  amount?: InputMaybe<Scalars['Int']>;
+  amount?: InputMaybe<Scalars['BigInt']>;
   date?: InputMaybe<Scalars['DateTime']>;
   id: Scalars['Int'];
   note?: InputMaybe<Scalars['String']>;
@@ -92,12 +93,12 @@ export type QueryGetTransactionArgs = {
 
 
 export type QueryGetTransactionsArgs = {
-  fromAmount?: InputMaybe<Scalars['Int']>;
+  fromAmount?: InputMaybe<Scalars['BigInt']>;
   fromDate?: InputMaybe<Scalars['DateTime']>;
   reasons?: InputMaybe<Array<Scalars['String']>>;
   skip?: InputMaybe<Scalars['Int']>;
   take?: InputMaybe<Scalars['Int']>;
-  toAmount?: InputMaybe<Scalars['Int']>;
+  toAmount?: InputMaybe<Scalars['BigInt']>;
   toDate?: InputMaybe<Scalars['DateTime']>;
 };
 
@@ -110,7 +111,7 @@ export type Reason = {
 
 export type Transaction = {
   __typename?: 'Transaction';
-  amount: Scalars['Int'];
+  amount: Scalars['BigInt'];
   date: Scalars['DateTime'];
   id: Scalars['Int'];
   note?: Maybe<Scalars['String']>;
@@ -206,6 +207,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  BigInt: ResolverTypeWrapper<Scalars['BigInt']>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
   EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']>;
@@ -223,6 +225,7 @@ export type ResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  BigInt: Scalars['BigInt'];
   Boolean: Scalars['Boolean'];
   DateTime: Scalars['DateTime'];
   EmailAddress: Scalars['EmailAddress'];
@@ -237,6 +240,10 @@ export type ResolversParentTypes = {
   User: UserModel;
   Void: Scalars['Void'];
 };
+
+export interface BigIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['BigInt'], any> {
+  name: 'BigInt';
+}
 
 export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
   name: 'DateTime';
@@ -274,7 +281,7 @@ export type ReasonResolvers<ContextType = CustomContext, ParentType extends Reso
 };
 
 export type TransactionResolvers<ContextType = CustomContext, ParentType extends ResolversParentTypes['Transaction'] = ResolversParentTypes['Transaction']> = {
-  amount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  amount?: Resolver<ResolversTypes['BigInt'], ParentType, ContextType>;
   date?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   note?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -307,6 +314,7 @@ export interface VoidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type Resolvers<ContextType = CustomContext> = {
+  BigInt?: GraphQLScalarType;
   DateTime?: GraphQLScalarType;
   EmailAddress?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;

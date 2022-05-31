@@ -4,6 +4,7 @@ import {
   DateTimeResolver,
   NonEmptyStringResolver,
   EmailAddressResolver,
+  BigIntResolver
 } from 'graphql-scalars';
 
 import { CustomContext } from '@schema/types';
@@ -27,6 +28,7 @@ export const resolvers: Resolvers = {
   Void: VoidResolver,
   NonEmptyString: NonEmptyStringResolver,
   EmailAddress: EmailAddressResolver,
+  BigInt: BigIntResolver, 
 
   Query: {
     getReasons: (_, __, context) => {

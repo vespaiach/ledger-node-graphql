@@ -27,8 +27,8 @@ export class TransactionDS extends DataSource {
     const take = args.take;
     const skip = args.skip;
 
-    const gteAmount = typeof args.fromAmount === 'number' ? args.fromAmount : undefined;
-    const lteAmount = typeof args.toAmount === 'number' ? args.toAmount : undefined;
+    const gteAmount = typeof args.fromAmount === 'bigint' ? args.fromAmount : undefined;
+    const lteAmount = typeof args.toAmount === 'bigint' ? args.toAmount : undefined;
 
     let reasons: Record<string, unknown> | undefined = undefined;
     if (args.reasons && args.reasons.length) {
