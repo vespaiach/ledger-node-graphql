@@ -148,7 +148,12 @@ export class TransactionDS extends DataSource {
         updatedAt: new Date(),
         reasons: reasonsObj
           ? {
-              delete: tran.reasons.map((r) => ({ reasonId_transactionId: r })),
+              delete: tran.reasons.map((r) => ({
+                reasonId_transactionId: {
+                  reasonId: r.reasonId,
+                  transactionId: r.transactionId,
+                },
+              })),
               create: reasonsObj?.map((r) => ({ reason: { connect: { id: r.id } } })),
             }
           : undefined,
