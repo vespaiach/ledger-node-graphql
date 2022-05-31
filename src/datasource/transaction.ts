@@ -28,23 +28,23 @@ export class TransactionDS extends DataSource {
     const take = args.take;
     const skip = args.skip;
 
-    const gteAmount = args.fromAmount || undefined;
-    const lteAmount = args.toAmount || undefined;
+    const gteAmount = typeof args.fromAmount === 'number' ? args.fromAmount : undefined;
+    const lteAmount = typeof args.toAmount === 'number' ? args.toAmount : undefined;
 
     let reasons: Record<string, unknown> | undefined = undefined;
     if (args.reasons && args.reasons.length) {
-      const reasonsList: ReasonModel[] = [];
+      const reasonTexts = args.reasons;
 
-      args.reasons.forEach(async (t) => {
-        const r = await this.reasonDS.getReasonByText(t);
-        if (r) {
-          reasonsList.push(r);
-        }
-      });
+      // Todo: find another way to typing this code better
+      const reasonsList = (
+        await Promise.all(reasonTexts.map((t) => this.reasonDS.getReasonByText(t)))
+      ).filter(Boolean) as unknown as ReasonModel[];
 
       if (reasonsList && reasonsList.length) {
         reasons = {
-          id: { in: reasonsList.map((r) => r.id) },
+          every: {
+            reasonId: { in: reasonsList.map((r) => r.id) },
+          },
         };
       }
     }
@@ -62,7 +62,7 @@ export class TransactionDS extends DataSource {
             : undefined,
 
         amount:
-          gteAmount || lteAmount
+          gteAmount !== undefined || lteAmount !== undefined
             ? {
                 gte: gteAmount,
                 lte: lteAmount,
