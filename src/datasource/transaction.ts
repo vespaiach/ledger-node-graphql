@@ -48,29 +48,29 @@ export class TransactionDS extends DataSource {
       }
     }
 
-    const total = await this.dbClient.transaction.count({
-      where: {
-        userId,
+    const where = {
+      userId,
 
-        date:
-          args.fromDate || args.toDate
-            ? {
-                gte: args.fromDate ? args.fromDate : undefined,
-                lte: args.toDate ? args.toDate : undefined,
-              }
-            : undefined,
+      date:
+        args.fromDate || args.toDate
+          ? {
+              gte: args.fromDate ? args.fromDate : undefined,
+              lte: args.toDate ? args.toDate : undefined,
+            }
+          : undefined,
 
-        amount:
-          gteAmount !== undefined || lteAmount !== undefined
-            ? {
-                gte: gteAmount,
-                lte: lteAmount,
-              }
-            : undefined,
+      amount:
+        gteAmount !== undefined || lteAmount !== undefined
+          ? {
+              gte: gteAmount,
+              lte: lteAmount,
+            }
+          : undefined,
 
-        reasons,
-      },
-    });
+      reasons,
+    };
+
+    const total = await this.dbClient.transaction.count({ where });
 
     const result = await this.dbClient.transaction.findMany({
       orderBy: {
@@ -78,27 +78,7 @@ export class TransactionDS extends DataSource {
       },
       take,
       skip,
-      where: {
-        userId,
-
-        date:
-          args.fromDate || args.toDate
-            ? {
-                gte: args.fromDate ? args.fromDate : undefined,
-                lte: args.toDate ? args.toDate : undefined,
-              }
-            : undefined,
-
-        amount:
-          gteAmount || lteAmount
-            ? {
-                gte: gteAmount,
-                lte: lteAmount,
-              }
-            : undefined,
-
-        reasons,
-      },
+      where,
     });
 
     return {
