@@ -4,6 +4,8 @@ const typeDefs = /* GraphQL */ `
   scalar NonEmptyString
   scalar EmailAddress
   scalar BigInt
+  scalar Username
+  scalar Password
 
   type User {
     id: Int!
@@ -55,17 +57,17 @@ const typeDefs = /* GraphQL */ `
 
   type Mutation {
     createUser(
-      username: String! @constraint(pattern: "^[0-9a-zA-Z_]*$", minLength: 3, maxLength: 127)
+      username: Username!
       email: EmailAddress!
-      password: String! @constraint(minLength: 5, maxLength: 127)
+      password: Password!
       firstName: String @constraint(maxLength: 127)
       lastName: String @constraint(maxLength: 127)
     ): User
 
     updateUser(
-      username: String @constraint(pattern: "^[0-9a-zA-Z_]*$", minLength: 3, maxLength: 127)
+      username: Username
       email: EmailAddress
-      password: String @constraint(minLength: 5, maxLength: 127)
+      password: Password
       firstName: String
       lastName: String
       isActive: Boolean
@@ -89,8 +91,8 @@ const typeDefs = /* GraphQL */ `
     deleteTransaction(id: Int!): Boolean
 
     signin(
-      username: String! @constraint(pattern: "^[0-9a-zA-Z_]*$", minLength: 3, maxLength: 127)
-      password: String! @constraint(minLength: 5, maxLength: 127)
+      username: Username!
+      password: Password!
     ): String!
 
     signout: Void

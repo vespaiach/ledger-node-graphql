@@ -10,6 +10,7 @@ import {
 import { hashPassword, comparePassword, issueToken } from '@util/hashing';
 import { Resolvers } from '@schema/types.generated';
 import { authorize } from '@util/authorize';
+import { PasswordResolver, UsernameResolver } from '@util/customScalar';
 
 class LedgerResolvers {
   constructor() { }
@@ -19,6 +20,8 @@ class LedgerResolvers {
   NonEmptyString = NonEmptyStringResolver;
   EmailAddress = EmailAddressResolver;
   BigInt = BigIntResolver;
+  Username = UsernameResolver;
+  Password = PasswordResolver;
 
   @authorize
   private getReasons(_, __, context) {
